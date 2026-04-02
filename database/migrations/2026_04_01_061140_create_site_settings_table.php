@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('site_settings', function (Blueprint $table) {
+            $table->id();
+            $table->string('company_name');
+            $table->string('logo_path')->nullable();
+            $table->string('favicon_path')->nullable();
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->text('address')->nullable();
+            $table->text('maps_embed_url')->nullable();
+            $table->json('social_links')->nullable();
+            $table->text('footer_text')->nullable();
+            $table->string('seo_default_title')->nullable();
+            $table->text('seo_default_description')->nullable();
+            $table->string('seo_default_keywords')->nullable();
+            $table->json('seo_per_page')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('site_settings');
+    }
+};

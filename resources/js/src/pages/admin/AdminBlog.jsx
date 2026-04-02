@@ -1,0 +1,263 @@
+import { useEffect, useState } from 'react';
+import { api, unwrap } from '@/services/api';
+import toast from 'react-hot-toast';
+import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
+import AdminModal from '@/components/admin/AdminModal';
+import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
+import { toastApiError } from '@/utils/toastApiError';
+
+const inp = 'mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm';
+
+const empty = {
+    title: '',
+    slug: '',
+    category: '',
+    tags: '',
+    content: '',
+    excerpt: '',
+    author: '',
+    published_at: '',
+    status: 'draft',
+};
+
+function buildBlogFormData(form, featuredFile) {
+    const fd = new FormData();
+    fd.append('title', form.title);
+    if (form.slug?.trim()) {
+        fd.append('slug', form.slug.trim());
+    }
+    fd.append('category', form.category || '');
+    const tags = form.tags
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    fd.append('tags', JSON.stringify(tags));
+    fd.append('content', form.content || '');
+    fd.append('excerpt', form.excerpt || '');
+    fd.append('author', form.author || '');
+    if (form.published_at) {
+        fd.append('published_at', form.published_at);
+    }
+    fd.append('status', form.status);
+    if (featuredFile) {
+        fd.append('featured_image', featuredFile);
+    }
+    return fd;
+}
+
+export default function AdminBlog() {
+    const [rows, setRows] = useState([]);
+    const [meta, setMeta] = useState({});
+    const [page, setPage] = useState(1);
+    const [modal, setModal] = useState(false);
+    const [editing, setEditing] = useState(null);
+    const [form, setForm] = useState(empty);
+    const [featuredFile, setFeaturedFile] = useState(null);
+    const [deleteId, setDeleteId] = useState(null);
+
+    function load() {
+        api
+            .get('/admin/blog-posts', { params: { page, per_page: 12 } })
+            .then((r) => {
+                const d = unwrap(r);
+                setRows(d.items || []);
+                setMeta(d.pagination || {});
+            })
+            .catch(() => toast.error('Failed to load'));
+    }
+
+    useEffect(() => {
+        load();
+    }, [page]);
+
+    function openCreate() {
+        setEditing(null);
+        setForm(empty);
+        setFeaturedFile(null);
+        setModal(true);
+    }
+
+    async function openEdit(b) {
+        setFeaturedFile(null);
+        let d = b;
+        try {
+            const r = await api.get(`/admin/blog-posts/${b.id}`);
+            d = unwrap(r) || b;
+        } catch {
+            /* use row */
+        }
+        setEditing(d);
+        const tagsStr = Array.isArray(d.tags) ? d.tags.join(', ') : '';
+        let pub = '';
+        if (d.published_at) {
+            const dt = new Date(d.published_at);
+            if (!Number.isNaN(dt.getTime())) {
+                pub = dt.toISOString().slice(0, 16);
+            }
+        }
+        setForm({
+            title: d.title || '',
+            slug: d.slug || '',
+            category: d.category || '',
+            tags: tagsStr,
+            content: d.content || '',
+            excerpt: d.excerpt || '',
+            author: d.author || '',
+            published_at: pub,
+            status: d.status || 'draft',
+        });
+        setModal(true);
+    }
+
+    async function save(e) {
+        e.preventDefault();
+        const fd = buildBlogFormData(form, featuredFile);
+        try {
+            if (editing) {
+                unwrap(await api.put(`/admin/blog-posts/${editing.id}`, fd));
+                toast.success('Post updated');
+            } else {
+                unwrap(await api.post('/admin/blog-posts', fd));
+                toast.success('Post created');
+            }
+            setModal(false);
+            load();
+        } catch (err) {
+            toastApiError(err, 'Save failed');
+        }
+    }
+
+    async function remove(id) {
+        try {
+            unwrap(await api.delete(`/admin/blog-posts/${id}`));
+            toast.success('Deleted');
+            setDeleteId(null);
+            load();
+        } catch (err) {
+            toastApiError(err, 'Delete failed');
+        }
+    }
+
+    return (
+        <div>
+            <h1 className="text-2xl font-bold">Blog posts</h1>
+            <p className="mt-2 text-sm text-slate-400">Create and edit posts; use HTML or markdown in content depending on your frontend.</p>
+            <AdminCrudToolbar onReload={load} onCreate={openCreate} createLabel="New post" />
+
+            <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+                <table className="min-w-full text-sm">
+                    <thead className="bg-white/5 text-left">
+                        <tr>
+                            <th className="p-3">Title</th>
+                            <th className="p-3">Status</th>
+                            <th className="p-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows.map((b) => (
+                            <tr key={b.id} className="border-t border-white/5">
+                                <td className="p-3">{b.title}</td>
+                                <td className="p-3">{b.status}</td>
+                                <td className="p-3 text-right">
+                                    <button type="button" className="mr-2 text-landogz-accent" onClick={() => openEdit(b)}>
+                                        Edit
+                                    </button>
+                                    <button type="button" className="text-red-400" onClick={() => setDeleteId(b.id)}>
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div className="mt-4 flex gap-2">
+                <button type="button" disabled={page <= 1} className="rounded border border-white/15 px-3 py-1" onClick={() => setPage((p) => p - 1)}>
+                    Prev
+                </button>
+                <span className="text-slate-400">
+                    {meta.current_page || page} / {meta.last_page || 1}
+                </span>
+                <button
+                    type="button"
+                    disabled={(meta.current_page || page) >= (meta.last_page || 1)}
+                    className="rounded border border-white/15 px-3 py-1"
+                    onClick={() => setPage((p) => p + 1)}
+                >
+                    Next
+                </button>
+            </div>
+
+            {modal ? (
+                <AdminModal title={editing ? 'Edit post' : 'New post'} onClose={() => setModal(false)} wide>
+                    <form onSubmit={save} className="space-y-3">
+                        <label className="block text-sm">
+                            <span className="text-slate-400">Title</span>
+                            <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+                        </label>
+                        <label className="block text-sm">
+                            <span className="text-slate-400">Slug (optional)</span>
+                            <input className={inp} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+                        </label>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="block text-sm">
+                                <span className="text-slate-400">Category</span>
+                                <input className={inp} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+                            </label>
+                            <label className="block text-sm">
+                                <span className="text-slate-400">Author</span>
+                                <input className={inp} value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} />
+                            </label>
+                        </div>
+                        <label className="block text-sm">
+                            <span className="text-slate-400">Tags (comma-separated)</span>
+                            <input className={inp} value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
+                        </label>
+                        <label className="block text-sm">
+                            <span className="text-slate-400">Excerpt</span>
+                            <textarea className={inp} rows={2} value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} />
+                        </label>
+                        <label className="block text-sm">
+                            <span className="text-slate-400">Content</span>
+                            <textarea className={inp} rows={8} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
+                        </label>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="block text-sm">
+                                <span className="text-slate-400">Status</span>
+                                <select className={inp} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                                    <option value="draft">draft</option>
+                                    <option value="published">published</option>
+                                </select>
+                            </label>
+                            <label className="block text-sm">
+                                <span className="text-slate-400">Published at</span>
+                                <input
+                                    className={inp}
+                                    type="datetime-local"
+                                    value={form.published_at}
+                                    onChange={(e) => setForm({ ...form, published_at: e.target.value })}
+                                />
+                            </label>
+                        </div>
+                        <label className="block text-sm">
+                            <span className="text-slate-400">Featured image</span>
+                            <input type="file" accept="image/*" className="mt-1 text-sm" onChange={(e) => setFeaturedFile(e.target.files?.[0] || null)} />
+                        </label>
+                        <div className="flex gap-2 pt-2">
+                            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 text-sm font-medium">
+                                Save
+                            </button>
+                            <button type="button" className="rounded-lg border border-white/15 px-4 py-2 text-sm" onClick={() => setModal(false)}>
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </AdminModal>
+            ) : null}
+
+            {deleteId ? (
+                <AdminConfirmDialog title="Delete this post?" onConfirm={() => remove(deleteId)} onCancel={() => setDeleteId(null)} danger />
+            ) : null}
+        </div>
+    );
+}
