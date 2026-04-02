@@ -14,9 +14,9 @@ const SHELLS = [
     },
     {
         className:
-            'bg-gradient-to-br from-emerald-400/30 via-teal-600/20 to-slate-900/50 dark:from-emerald-500/20 dark:via-teal-600/30 dark:to-slate-950',
+            'bg-gradient-to-br from-emerald-300/45 via-teal-400/35 to-cyan-800/40 dark:from-emerald-400/35 dark:via-teal-500/35 dark:to-slate-900/90',
         pattern:
-            'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.25), transparent 50%), radial-gradient(circle at 0% 100%, rgba(45,212,191,0.35), transparent 45%)',
+            'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.5), transparent 48%), radial-gradient(circle at 0% 100%, rgba(110,231,183,0.55), transparent 42%), radial-gradient(circle at 100% 60%, rgba(45,212,191,0.4), transparent 50%)',
     },
 ];
 

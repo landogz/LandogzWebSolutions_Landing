@@ -4,9 +4,23 @@ import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import {
+    adminInput,
+    adminLabel,
+    adminPrimaryBtn,
+    adminSecondaryBtn,
+    adminTextarea,
+    adminFileInput,
+    adminTableShell,
+    adminTableHead,
+    adminTh,
+    adminTd,
+    adminPaginationBtn,
+    adminTextLink,
+    adminTextLinkDanger,
+} from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
-
-const inp = 'mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm';
 
 const empty = {
     name: '',
@@ -124,47 +138,56 @@ export default function AdminTeam() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold">Team</h1>
+            <AdminPageHeader title="Team" description="People cards on the landing page — photo, role, bio, and social links." />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} createLabel="Add member" />
 
-            <div className="overflow-x-auto rounded-xl border border-white/10">
+            <div className={`${adminTableShell} mt-6`}>
                 <table className="min-w-full text-sm">
-                    <thead className="bg-white/5 text-left">
+                    <thead className={adminTableHead}>
                         <tr>
-                            <th className="p-3">Name</th>
-                            <th className="p-3">Role</th>
-                            <th className="p-3 text-right">Actions</th>
+                            <th className={adminTh}>Name</th>
+                            <th className={adminTh}>Role</th>
+                            <th className={`${adminTh} text-right`}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {rows.map((m) => (
-                            <tr key={m.id} className="border-t border-white/5">
-                                <td className="p-3">{m.name}</td>
-                                <td className="p-3">{m.position}</td>
-                                <td className="p-3 text-right">
-                                    <button type="button" className="mr-2 text-landogz-accent" onClick={() => openEdit(m)}>
-                                        Edit
-                                    </button>
-                                    <button type="button" className="text-red-400" onClick={() => setDeleteId(m.id)}>
-                                        Delete
-                                    </button>
+                        {rows.length === 0 ? (
+                            <tr>
+                                <td colSpan={3} className={`${adminTd} py-12 text-center text-slate-500`}>
+                                    No team members yet.
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            rows.map((m) => (
+                                <tr key={m.id} className="transition hover:bg-white/[0.02]">
+                                    <td className={`${adminTd} font-medium text-slate-200`}>{m.name}</td>
+                                    <td className={adminTd}>{m.position || '—'}</td>
+                                    <td className={`${adminTd} text-right`}>
+                                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(m)}>
+                                            Edit
+                                        </button>
+                                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(m.id)}>
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
-            <div className="mt-4 flex gap-2">
-                <button type="button" disabled={page <= 1} className="rounded border border-white/15 px-3 py-1" onClick={() => setPage((p) => p - 1)}>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+                <button type="button" disabled={page <= 1} className={adminPaginationBtn} onClick={() => setPage((p) => p - 1)}>
                     Prev
                 </button>
-                <span className="text-slate-400">
-                    {meta.current_page || page} / {meta.last_page || 1}
+                <span className="text-sm text-slate-500">
+                    <span className="tabular-nums text-slate-300">{meta.current_page || page}</span> /{' '}
+                    <span className="tabular-nums">{meta.last_page || 1}</span>
                 </span>
                 <button
                     type="button"
                     disabled={(meta.current_page || page) >= (meta.last_page || 1)}
-                    className="rounded border border-white/15 px-3 py-1"
+                    className={adminPaginationBtn}
                     onClick={() => setPage((p) => p + 1)}
                 >
                     Next
@@ -173,52 +196,52 @@ export default function AdminTeam() {
 
             {modal ? (
                 <AdminModal title={editing ? 'Edit team member' : 'Add team member'} onClose={() => setModal(false)} wide>
-                    <form onSubmit={save} className="space-y-3">
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Name</span>
-                            <input className={inp} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                    <form onSubmit={save} className="space-y-4">
+                        <label className="block">
+                            <span className={adminLabel}>Name</span>
+                            <input className={adminInput} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Position</span>
-                            <input className={inp} value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Position</span>
+                            <input className={adminInput} value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Bio</span>
-                            <textarea className={inp} rows={3} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Bio</span>
+                            <textarea className={adminTextarea} rows={3} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
                         </label>
-                        <div className="grid gap-3 sm:grid-cols-3">
-                            <label className="block text-sm">
-                                <span className="text-slate-400">LinkedIn</span>
-                                <input className={inp} value={form.linkedin} onChange={(e) => setForm({ ...form, linkedin: e.target.value })} />
+                        <div className="grid gap-4 sm:grid-cols-3">
+                            <label className="block">
+                                <span className={adminLabel}>LinkedIn</span>
+                                <input className={adminInput} value={form.linkedin} onChange={(e) => setForm({ ...form, linkedin: e.target.value })} />
                             </label>
-                            <label className="block text-sm">
-                                <span className="text-slate-400">GitHub</span>
-                                <input className={inp} value={form.github} onChange={(e) => setForm({ ...form, github: e.target.value })} />
+                            <label className="block">
+                                <span className={adminLabel}>GitHub</span>
+                                <input className={adminInput} value={form.github} onChange={(e) => setForm({ ...form, github: e.target.value })} />
                             </label>
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Twitter / X</span>
-                                <input className={inp} value={form.twitter} onChange={(e) => setForm({ ...form, twitter: e.target.value })} />
+                            <label className="block">
+                                <span className={adminLabel}>Twitter / X</span>
+                                <input className={adminInput} value={form.twitter} onChange={(e) => setForm({ ...form, twitter: e.target.value })} />
                             </label>
                         </div>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Sort order</span>
+                        <label className="block">
+                            <span className={adminLabel}>Sort order</span>
                             <input
-                                className={inp}
+                                className={adminInput}
                                 type="number"
                                 min={0}
                                 value={form.sort_order}
                                 onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) || 0 })}
                             />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Photo {editing ? '(optional)' : '(optional)'}</span>
-                            <input type="file" accept="image/*" className="mt-1 text-sm" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
+                        <label className="block">
+                            <span className={adminLabel}>Photo</span>
+                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
                         </label>
-                        <div className="flex gap-2 pt-2">
-                            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 text-sm font-medium">
+                        <div className="flex flex-wrap gap-3 pt-2">
+                            <button type="submit" className={adminPrimaryBtn}>
                                 Save
                             </button>
-                            <button type="button" className="rounded-lg border border-white/15 px-4 py-2 text-sm" onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
                                 Cancel
                             </button>
                         </div>

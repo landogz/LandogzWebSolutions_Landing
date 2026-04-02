@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { api, unwrap } from '@/services/api';
 import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import { adminInput, adminLabel, adminPrimaryBtn, adminTextarea, adminPanel } from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
 
 export default function AdminAbout() {
@@ -20,10 +22,7 @@ export default function AdminAbout() {
     }
 
     useEffect(() => {
-        api
-            .get('/admin/about')
-            .then((r) => setForm(unwrap(r) || {}))
-            .finally(() => setLoading(false));
+        reload();
     }, []);
 
     async function save(e) {
@@ -36,35 +35,48 @@ export default function AdminAbout() {
         }
     }
 
-    if (loading) return <p className="text-slate-400">Loading…</p>;
+    if (loading) {
+        return (
+            <div className="flex min-h-[30vh] items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500/30 border-t-sky-400" />
+            </div>
+        );
+    }
 
     return (
-        <form onSubmit={save} className="max-w-2xl space-y-4">
-            <h1 className="text-2xl font-bold">About section</h1>
-            <AdminCrudToolbar onReload={reload} />
-            {['company_name', 'tagline', 'founding_year', 'description', 'mission', 'vision'].map((key) => (
-                <label key={key} className="block text-sm">
-                    <span className="text-slate-400">{key}</span>
-                    {key === 'description' || key === 'mission' || key === 'vision' ? (
-                        <textarea
-                            className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2"
-                            rows={4}
-                            value={form[key] ?? ''}
-                            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                        />
-                    ) : (
-                        <input
-                            className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2"
-                            type={key === 'founding_year' ? 'number' : 'text'}
-                            value={form[key] ?? ''}
-                            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                        />
-                    )}
-                </label>
-            ))}
-            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 font-semibold">
-                Save
-            </button>
-        </form>
+        <div>
+            <AdminPageHeader
+                title="About"
+                description="Company profile copy shown on the public About section."
+            />
+            <form onSubmit={save} className={`${adminPanel} max-w-2xl space-y-5`}>
+                <AdminCrudToolbar onReload={reload} />
+                {['company_name', 'tagline', 'founding_year', 'description', 'mission', 'vision'].map((key) => (
+                    <label key={key} className="block">
+                        <span className={adminLabel}>{key.replace(/_/g, ' ')}</span>
+                        {key === 'description' || key === 'mission' || key === 'vision' ? (
+                            <textarea
+                                className={adminTextarea}
+                                rows={4}
+                                value={form[key] ?? ''}
+                                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                            />
+                        ) : (
+                            <input
+                                className={adminInput}
+                                type={key === 'founding_year' ? 'number' : 'text'}
+                                value={form[key] ?? ''}
+                                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                            />
+                        )}
+                    </label>
+                ))}
+                <div className="pt-2">
+                    <button type="submit" className={adminPrimaryBtn}>
+                        Save about
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 }

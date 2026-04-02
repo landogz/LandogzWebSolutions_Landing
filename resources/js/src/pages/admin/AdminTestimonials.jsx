@@ -4,9 +4,20 @@ import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import {
+    adminInput,
+    adminLabel,
+    adminPrimaryBtn,
+    adminSecondaryBtn,
+    adminSelect,
+    adminTextarea,
+    adminFileInput,
+    adminTestimonialCard,
+    adminTextLink,
+    adminTextLinkDanger,
+} from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
-
-const inp = 'mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm';
 
 const empty = {
     client_name: '',
@@ -109,50 +120,55 @@ export default function AdminTestimonials() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold">Testimonials</h1>
+            <AdminPageHeader title="Testimonials" description="Social proof quotes — rating, optional photo, and publish state." />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} />
 
-            <ul className="space-y-3">
-                {rows.map((t) => (
-                    <li key={t.id} className="rounded-lg border border-white/10 p-4">
-                        <div className="flex flex-wrap items-start justify-between gap-4">
-                            <div>
-                                <p className="font-medium">{t.client_name}</p>
-                                <p className="text-sm text-slate-400">{t.message}</p>
+            <ul className="mt-6 space-y-4">
+                {rows.length === 0 ? (
+                    <li className="rounded-xl border border-dashed border-white/10 py-12 text-center text-sm text-slate-500">No testimonials yet.</li>
+                ) : (
+                    rows.map((t) => (
+                        <li key={t.id} className={adminTestimonialCard}>
+                            <div className="flex flex-wrap items-start justify-between gap-4">
+                                <div className="min-w-0 flex-1">
+                                    <p className="font-display text-lg font-semibold text-white">{t.client_name}</p>
+                                    {t.company ? <p className="text-xs font-medium uppercase tracking-wider text-slate-500">{t.company}</p> : null}
+                                    <p className="mt-2 text-sm leading-relaxed text-slate-400">{t.message}</p>
+                                </div>
+                                <div className="flex shrink-0 gap-1">
+                                    <button type="button" className={adminTextLink} onClick={() => openEdit(t)}>
+                                        Edit
+                                    </button>
+                                    <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(t.id)}>
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
-                            <div className="flex shrink-0 gap-2">
-                                <button type="button" className="text-sm text-landogz-accent" onClick={() => openEdit(t)}>
-                                    Edit
-                                </button>
-                                <button type="button" className="text-sm text-red-400" onClick={() => setDeleteId(t.id)}>
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-                    </li>
-                ))}
+                        </li>
+                    ))
+                )}
             </ul>
 
             {modal ? (
                 <AdminModal title={editing ? 'Edit testimonial' : 'Create testimonial'} onClose={() => setModal(false)} wide>
-                    <form onSubmit={save} className="space-y-3">
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Client name</span>
-                            <input className={inp} value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} required />
+                    <form onSubmit={save} className="space-y-4">
+                        <label className="block">
+                            <span className={adminLabel}>Client name</span>
+                            <input className={adminInput} value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} required />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Company</span>
-                            <input className={inp} value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Company</span>
+                            <input className={adminInput} value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Message</span>
-                            <textarea className={inp} rows={4} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
+                        <label className="block">
+                            <span className={adminLabel}>Message</span>
+                            <textarea className={adminTextarea} rows={4} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
                         </label>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Rating (1–5)</span>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="block">
+                                <span className={adminLabel}>Rating (1–5)</span>
                                 <input
-                                    className={inp}
+                                    className={adminInput}
                                     type="number"
                                     min={1}
                                     max={5}
@@ -160,33 +176,33 @@ export default function AdminTestimonials() {
                                     onChange={(e) => setForm({ ...form, rating: Number(e.target.value) })}
                                 />
                             </label>
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Status</span>
-                                <select className={inp} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                            <label className="block">
+                                <span className={adminLabel}>Status</span>
+                                <select className={adminSelect} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
                                     <option value="draft">draft</option>
                                     <option value="published">published</option>
                                 </select>
                             </label>
                         </div>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Sort order</span>
+                        <label className="block">
+                            <span className={adminLabel}>Sort order</span>
                             <input
-                                className={inp}
+                                className={adminInput}
                                 type="number"
                                 min={0}
                                 value={form.sort_order}
                                 onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) || 0 })}
                             />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Photo</span>
-                            <input type="file" accept="image/*" className="mt-1 text-sm" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
+                        <label className="block">
+                            <span className={adminLabel}>Photo</span>
+                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
                         </label>
-                        <div className="flex gap-2 pt-2">
-                            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 text-sm font-medium">
+                        <div className="flex flex-wrap gap-3 pt-2">
+                            <button type="submit" className={adminPrimaryBtn}>
                                 Save
                             </button>
-                            <button type="button" className="rounded-lg border border-white/15 px-4 py-2 text-sm" onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
                                 Cancel
                             </button>
                         </div>

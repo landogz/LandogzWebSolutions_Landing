@@ -4,9 +4,22 @@ import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import {
+    adminInput,
+    adminLabel,
+    adminPrimaryBtn,
+    adminSecondaryBtn,
+    adminFileInput,
+    adminTableShell,
+    adminTableHead,
+    adminTh,
+    adminTd,
+    adminPaginationBtn,
+    adminTextLink,
+    adminTextLinkDanger,
+} from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
-
-const inp = 'mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm';
 
 const empty = { name: '', category: '', proficiency: 80, sort_order: 0 };
 
@@ -101,49 +114,58 @@ export default function AdminSkills() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold">Skills</h1>
+            <AdminPageHeader title="Skills" description="Capability rows for the landing skills section — optional icon upload per item." />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} />
 
-            <div className="overflow-x-auto rounded-xl border border-white/10">
+            <div className={`${adminTableShell} mt-6`}>
                 <table className="min-w-full text-sm">
-                    <thead className="bg-white/5">
+                    <thead className={adminTableHead}>
                         <tr>
-                            <th className="p-3 text-left">Name</th>
-                            <th className="p-3 text-left">Category</th>
-                            <th className="p-3 text-left">%</th>
-                            <th className="p-3 text-right">Actions</th>
+                            <th className={adminTh}>Name</th>
+                            <th className={adminTh}>Category</th>
+                            <th className={adminTh}>%</th>
+                            <th className={`${adminTh} text-right`}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {rows.map((s) => (
-                            <tr key={s.id} className="border-t border-white/5">
-                                <td className="p-3">{s.name}</td>
-                                <td className="p-3">{s.category}</td>
-                                <td className="p-3">{s.proficiency}</td>
-                                <td className="p-3 text-right">
-                                    <button type="button" className="mr-2 text-landogz-accent" onClick={() => openEdit(s)}>
-                                        Edit
-                                    </button>
-                                    <button type="button" className="text-red-400" onClick={() => setDeleteId(s.id)}>
-                                        Delete
-                                    </button>
+                        {rows.length === 0 ? (
+                            <tr>
+                                <td colSpan={4} className={`${adminTd} py-12 text-center text-slate-500`}>
+                                    No skills yet.
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            rows.map((s) => (
+                                <tr key={s.id} className="transition hover:bg-white/[0.02]">
+                                    <td className={`${adminTd} font-medium text-slate-200`}>{s.name}</td>
+                                    <td className={adminTd}>{s.category}</td>
+                                    <td className={`${adminTd} tabular-nums`}>{s.proficiency}</td>
+                                    <td className={`${adminTd} text-right`}>
+                                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(s)}>
+                                            Edit
+                                        </button>
+                                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(s.id)}>
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
-            <div className="mt-4 flex gap-2">
-                <button type="button" disabled={page <= 1} className="rounded border border-white/15 px-3 py-1" onClick={() => setPage((p) => p - 1)}>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+                <button type="button" disabled={page <= 1} className={adminPaginationBtn} onClick={() => setPage((p) => p - 1)}>
                     Prev
                 </button>
-                <span className="text-slate-400">
-                    {meta.current_page || page} / {meta.last_page || 1}
+                <span className="text-sm text-slate-500">
+                    <span className="tabular-nums text-slate-300">{meta.current_page || page}</span> /{' '}
+                    <span className="tabular-nums">{meta.last_page || 1}</span>
                 </span>
                 <button
                     type="button"
                     disabled={(meta.current_page || page) >= (meta.last_page || 1)}
-                    className="rounded border border-white/15 px-3 py-1"
+                    className={adminPaginationBtn}
                     onClick={() => setPage((p) => p + 1)}
                 >
                     Next
@@ -152,19 +174,19 @@ export default function AdminSkills() {
 
             {modal ? (
                 <AdminModal title={editing ? 'Edit skill' : 'Create skill'} onClose={() => setModal(false)} wide>
-                    <form onSubmit={save} className="space-y-3">
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Name</span>
-                            <input className={inp} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                    <form onSubmit={save} className="space-y-4">
+                        <label className="block">
+                            <span className={adminLabel}>Name</span>
+                            <input className={adminInput} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Category</span>
-                            <input className={inp} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required />
+                        <label className="block">
+                            <span className={adminLabel}>Category</span>
+                            <input className={adminInput} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Proficiency (0–100)</span>
+                        <label className="block">
+                            <span className={adminLabel}>Proficiency (0–100)</span>
                             <input
-                                className={inp}
+                                className={adminInput}
                                 type="number"
                                 min={0}
                                 max={100}
@@ -172,25 +194,25 @@ export default function AdminSkills() {
                                 onChange={(e) => setForm({ ...form, proficiency: Number(e.target.value) })}
                             />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Sort order</span>
+                        <label className="block">
+                            <span className={adminLabel}>Sort order</span>
                             <input
-                                className={inp}
+                                className={adminInput}
                                 type="number"
                                 min={0}
                                 value={form.sort_order}
                                 onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) || 0 })}
                             />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Icon {editing ? '(optional new file)' : '(optional)'}</span>
-                            <input type="file" accept="image/*" className="mt-1 text-sm" onChange={(e) => setIconFile(e.target.files?.[0] || null)} />
+                        <label className="block">
+                            <span className={adminLabel}>Icon {editing ? '(optional new file)' : '(optional)'}</span>
+                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setIconFile(e.target.files?.[0] || null)} />
                         </label>
-                        <div className="flex gap-2 pt-2">
-                            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 text-sm font-medium">
+                        <div className="flex flex-wrap gap-3 pt-2">
+                            <button type="submit" className={adminPrimaryBtn}>
                                 Save
                             </button>
-                            <button type="button" className="rounded-lg border border-white/15 px-4 py-2 text-sm" onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
                                 Cancel
                             </button>
                         </div>

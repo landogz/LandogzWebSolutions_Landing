@@ -4,9 +4,18 @@ import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import {
+    adminInput,
+    adminLabel,
+    adminPrimaryBtn,
+    adminSecondaryBtn,
+    adminFileInput,
+    adminListRow,
+    adminTextLink,
+    adminTextLinkDanger,
+} from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
-
-const inp = 'mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm';
 
 const empty = { company_name: '', website_url: '', sort_order: 0 };
 
@@ -96,55 +105,59 @@ export default function AdminClients() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold">Clients / partners</h1>
+            <AdminPageHeader title="Clients / partners" description="Logo strip and partner names for social proof on the landing page." />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} />
 
-            <ul className="space-y-2">
-                {rows.map((c) => (
-                    <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 px-4 py-3">
-                        <span>{c.company_name}</span>
-                        <div className="flex gap-2">
-                            <button type="button" className="text-sm text-landogz-accent" onClick={() => openEdit(c)}>
-                                Edit
-                            </button>
-                            <button type="button" className="text-sm text-red-400" onClick={() => setDeleteId(c.id)}>
-                                Delete
-                            </button>
-                        </div>
-                    </li>
-                ))}
+            <ul className="mt-6 space-y-3">
+                {rows.length === 0 ? (
+                    <li className="rounded-xl border border-dashed border-white/10 py-12 text-center text-sm text-slate-500">No clients yet.</li>
+                ) : (
+                    rows.map((c) => (
+                        <li key={c.id} className={adminListRow}>
+                            <span className="font-medium text-slate-200">{c.company_name}</span>
+                            <div className="flex gap-1">
+                                <button type="button" className={adminTextLink} onClick={() => openEdit(c)}>
+                                    Edit
+                                </button>
+                                <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(c.id)}>
+                                    Delete
+                                </button>
+                            </div>
+                        </li>
+                    ))
+                )}
             </ul>
 
             {modal ? (
                 <AdminModal title={editing ? 'Edit client' : 'Add client'} onClose={() => setModal(false)}>
-                    <form onSubmit={save} className="space-y-3">
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Company name</span>
-                            <input className={inp} value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} required />
+                    <form onSubmit={save} className="space-y-4">
+                        <label className="block">
+                            <span className={adminLabel}>Company name</span>
+                            <input className={adminInput} value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} required />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Website URL</span>
-                            <input className={inp} value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Website URL</span>
+                            <input className={adminInput} value={form.website_url} onChange={(e) => setForm({ ...form, website_url: e.target.value })} />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Sort order</span>
+                        <label className="block">
+                            <span className={adminLabel}>Sort order</span>
                             <input
-                                className={inp}
+                                className={adminInput}
                                 type="number"
                                 min={0}
                                 value={form.sort_order}
                                 onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) || 0 })}
                             />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Logo</span>
-                            <input type="file" accept="image/*" className="mt-1 text-sm" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
+                        <label className="block">
+                            <span className={adminLabel}>Logo</span>
+                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
                         </label>
-                        <div className="flex gap-2 pt-2">
-                            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 text-sm font-medium">
+                        <div className="flex flex-wrap gap-3 pt-2">
+                            <button type="submit" className={adminPrimaryBtn}>
                                 Save
                             </button>
-                            <button type="button" className="rounded-lg border border-white/15 px-4 py-2 text-sm" onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
                                 Cancel
                             </button>
                         </div>

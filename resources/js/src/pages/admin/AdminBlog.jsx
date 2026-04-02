@@ -4,9 +4,25 @@ import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import {
+    adminInput,
+    adminLabel,
+    adminPrimaryBtn,
+    adminSecondaryBtn,
+    adminSelect,
+    adminTextarea,
+    adminFileInput,
+    adminTableShell,
+    adminTableHead,
+    adminTh,
+    adminTd,
+    adminBadge,
+    adminPaginationBtn,
+    adminTextLink,
+    adminTextLinkDanger,
+} from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
-
-const inp = 'mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm';
 
 const empty = {
     title: '',
@@ -140,48 +156,61 @@ export default function AdminBlog() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold">Blog posts</h1>
-            <p className="mt-2 text-sm text-slate-400">Create and edit posts; use HTML or markdown in content depending on your frontend.</p>
+            <AdminPageHeader
+                title="Blog posts"
+                description="Editorial content for the site — HTML or markdown in the body depending on how the public blog renders."
+            />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} createLabel="New post" />
 
-            <div className="mt-4 overflow-x-auto rounded-xl border border-white/10">
+            <div className={`${adminTableShell} mt-6`}>
                 <table className="min-w-full text-sm">
-                    <thead className="bg-white/5 text-left">
+                    <thead className={adminTableHead}>
                         <tr>
-                            <th className="p-3">Title</th>
-                            <th className="p-3">Status</th>
-                            <th className="p-3 text-right">Actions</th>
+                            <th className={adminTh}>Title</th>
+                            <th className={adminTh}>Status</th>
+                            <th className={`${adminTh} text-right`}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {rows.map((b) => (
-                            <tr key={b.id} className="border-t border-white/5">
-                                <td className="p-3">{b.title}</td>
-                                <td className="p-3">{b.status}</td>
-                                <td className="p-3 text-right">
-                                    <button type="button" className="mr-2 text-landogz-accent" onClick={() => openEdit(b)}>
-                                        Edit
-                                    </button>
-                                    <button type="button" className="text-red-400" onClick={() => setDeleteId(b.id)}>
-                                        Delete
-                                    </button>
+                        {rows.length === 0 ? (
+                            <tr>
+                                <td colSpan={3} className={`${adminTd} py-12 text-center text-slate-500`}>
+                                    No posts yet.
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            rows.map((b) => (
+                                <tr key={b.id} className="transition hover:bg-white/[0.02]">
+                                    <td className={`${adminTd} font-medium text-slate-200`}>{b.title}</td>
+                                    <td className={adminTd}>
+                                        <span className={adminBadge}>{b.status}</span>
+                                    </td>
+                                    <td className={`${adminTd} text-right`}>
+                                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(b)}>
+                                            Edit
+                                        </button>
+                                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(b.id)}>
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
-            <div className="mt-4 flex gap-2">
-                <button type="button" disabled={page <= 1} className="rounded border border-white/15 px-3 py-1" onClick={() => setPage((p) => p - 1)}>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+                <button type="button" disabled={page <= 1} className={adminPaginationBtn} onClick={() => setPage((p) => p - 1)}>
                     Prev
                 </button>
-                <span className="text-slate-400">
-                    {meta.current_page || page} / {meta.last_page || 1}
+                <span className="text-sm text-slate-500">
+                    <span className="tabular-nums text-slate-300">{meta.current_page || page}</span> /{' '}
+                    <span className="tabular-nums">{meta.last_page || 1}</span>
                 </span>
                 <button
                     type="button"
                     disabled={(meta.current_page || page) >= (meta.last_page || 1)}
-                    className="rounded border border-white/15 px-3 py-1"
+                    className={adminPaginationBtn}
                     onClick={() => setPage((p) => p + 1)}
                 >
                     Next
@@ -190,64 +219,64 @@ export default function AdminBlog() {
 
             {modal ? (
                 <AdminModal title={editing ? 'Edit post' : 'New post'} onClose={() => setModal(false)} wide>
-                    <form onSubmit={save} className="space-y-3">
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Title</span>
-                            <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+                    <form onSubmit={save} className="space-y-4">
+                        <label className="block">
+                            <span className={adminLabel}>Title</span>
+                            <input className={adminInput} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Slug (optional)</span>
-                            <input className={inp} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Slug (optional)</span>
+                            <input className={adminInput} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
                         </label>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Category</span>
-                                <input className={inp} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="block">
+                                <span className={adminLabel}>Category</span>
+                                <input className={adminInput} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
                             </label>
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Author</span>
-                                <input className={inp} value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} />
+                            <label className="block">
+                                <span className={adminLabel}>Author</span>
+                                <input className={adminInput} value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} />
                             </label>
                         </div>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Tags (comma-separated)</span>
-                            <input className={inp} value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Tags (comma-separated)</span>
+                            <input className={adminInput} value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Excerpt</span>
-                            <textarea className={inp} rows={2} value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Excerpt</span>
+                            <textarea className={adminTextarea} rows={2} value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Content</span>
-                            <textarea className={inp} rows={8} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Content</span>
+                            <textarea className={adminTextarea} rows={8} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
                         </label>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Status</span>
-                                <select className={inp} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="block">
+                                <span className={adminLabel}>Status</span>
+                                <select className={adminSelect} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
                                     <option value="draft">draft</option>
                                     <option value="published">published</option>
                                 </select>
                             </label>
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Published at</span>
+                            <label className="block">
+                                <span className={adminLabel}>Published at</span>
                                 <input
-                                    className={inp}
+                                    className={adminInput}
                                     type="datetime-local"
                                     value={form.published_at}
                                     onChange={(e) => setForm({ ...form, published_at: e.target.value })}
                                 />
                             </label>
                         </div>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Featured image</span>
-                            <input type="file" accept="image/*" className="mt-1 text-sm" onChange={(e) => setFeaturedFile(e.target.files?.[0] || null)} />
+                        <label className="block">
+                            <span className={adminLabel}>Featured image</span>
+                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setFeaturedFile(e.target.files?.[0] || null)} />
                         </label>
-                        <div className="flex gap-2 pt-2">
-                            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 text-sm font-medium">
+                        <div className="flex flex-wrap gap-3 pt-2">
+                            <button type="submit" className={adminPrimaryBtn}>
                                 Save
                             </button>
-                            <button type="button" className="rounded-lg border border-white/15 px-4 py-2 text-sm" onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
                                 Cancel
                             </button>
                         </div>

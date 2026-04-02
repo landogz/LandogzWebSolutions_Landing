@@ -16,7 +16,7 @@ function SocialIcon({ href, label, children }) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-sky-500/40 hover:text-sky-600 dark:border-white/10 dark:bg-slate-800/90 dark:text-slate-300 dark:hover:border-sky-400/30 dark:hover:text-sky-400"
+            className="flex h-11 min-h-[44px] w-11 min-w-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-sky-500/40 hover:text-sky-600 dark:border-white/10 dark:bg-slate-800/90 dark:text-slate-300 dark:hover:border-sky-400/30 dark:hover:text-sky-400"
             aria-label={label}
         >
             {children}
@@ -29,8 +29,8 @@ export default function LandingFooter({ site, tagline }) {
     const year = new Date().getFullYear();
 
     return (
-        <footer className="border-t border-slate-200 bg-slate-50/80 dark:border-white/10 dark:bg-slate-950/90">
-            <div className="mx-auto max-w-6xl px-4 py-14">
+        <footer className="border-t border-slate-200 bg-slate-50/80 pb-safe dark:border-white/10 dark:bg-slate-950/90">
+            <div className="mx-auto max-w-6xl px-4 py-12 sm:py-14">
                 <div className="grid gap-10 md:grid-cols-12">
                     <div className="md:col-span-5">
                         <p className="font-display text-lg font-bold text-slate-900 dark:text-white">{site?.company_name}</p>

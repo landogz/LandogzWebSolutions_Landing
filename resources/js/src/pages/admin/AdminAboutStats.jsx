@@ -4,9 +4,17 @@ import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import {
+    adminInput,
+    adminLabel,
+    adminPrimaryBtn,
+    adminSecondaryBtn,
+    adminListRow,
+    adminTextLink,
+    adminTextLinkDanger,
+} from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
-
-const inp = 'mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm';
 
 const empty = { label: '', value: '', sort_order: 0 };
 
@@ -70,53 +78,59 @@ export default function AdminAboutStats() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold">About stats</h1>
+            <AdminPageHeader title="About stats" description="Numeric highlights (years, projects, clients) beside your About narrative." />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} />
 
-            <ul className="space-y-2">
-                {rows.map((s) => (
-                    <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 px-4 py-3">
-                        <span>
-                            {s.label}: <strong>{s.value}</strong>
-                        </span>
-                        <div className="flex gap-2">
-                            <button type="button" className="text-sm text-landogz-accent" onClick={() => openEdit(s)}>
-                                Edit
-                            </button>
-                            <button type="button" className="text-sm text-red-400" onClick={() => setDeleteId(s.id)}>
-                                Delete
-                            </button>
-                        </div>
-                    </li>
-                ))}
+            <ul className="mt-6 space-y-3">
+                {rows.length === 0 ? (
+                    <li className="rounded-xl border border-dashed border-white/10 py-12 text-center text-sm text-slate-500">No stats yet.</li>
+                ) : (
+                    rows.map((s) => (
+                        <li key={s.id} className={adminListRow}>
+                            <span className="text-slate-200">
+                                <span className="font-medium">{s.label}</span>
+                                <span className="mx-2 text-slate-500">·</span>
+                                <span className="font-display text-lg font-bold tabular-nums text-sky-300/90">{s.value}</span>
+                            </span>
+                            <div className="flex gap-1">
+                                <button type="button" className={adminTextLink} onClick={() => openEdit(s)}>
+                                    Edit
+                                </button>
+                                <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(s.id)}>
+                                    Delete
+                                </button>
+                            </div>
+                        </li>
+                    ))
+                )}
             </ul>
 
             {modal ? (
                 <AdminModal title={editing ? 'Edit stat' : 'Create stat'} onClose={() => setModal(false)}>
-                    <form onSubmit={save} className="space-y-3">
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Label</span>
-                            <input className={inp} value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} required />
+                    <form onSubmit={save} className="space-y-4">
+                        <label className="block">
+                            <span className={adminLabel}>Label</span>
+                            <input className={adminInput} value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} required />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Value</span>
-                            <input className={inp} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} required />
+                        <label className="block">
+                            <span className={adminLabel}>Value</span>
+                            <input className={adminInput} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} required />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Sort order</span>
+                        <label className="block">
+                            <span className={adminLabel}>Sort order</span>
                             <input
-                                className={inp}
+                                className={adminInput}
                                 type="number"
                                 min={0}
                                 value={form.sort_order}
                                 onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) || 0 })}
                             />
                         </label>
-                        <div className="flex gap-2 pt-2">
-                            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 text-sm font-medium">
+                        <div className="flex flex-wrap gap-3 pt-2">
+                            <button type="submit" className={adminPrimaryBtn}>
                                 Save
                             </button>
-                            <button type="button" className="rounded-lg border border-white/15 px-4 py-2 text-sm" onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
                                 Cancel
                             </button>
                         </div>

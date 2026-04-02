@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { api, unwrap } from '@/services/api';
 import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import { adminInput, adminLabel, adminPrimaryBtn, adminTextarea, adminPanel } from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
 
 const empty = {
@@ -37,17 +39,7 @@ export default function AdminHero() {
     }
 
     useEffect(() => {
-        setLoading(true);
-        api
-            .get('/admin/hero')
-            .then((r) => {
-                const d = unwrap(r);
-                if (d) {
-                    setForm({ ...empty, ...d });
-                    setWords((d.animated_words || []).join(', '));
-                }
-            })
-            .finally(() => setLoading(false));
+        reload();
     }, []);
 
     async function save(e) {
@@ -64,39 +56,52 @@ export default function AdminHero() {
         }
     }
 
-    if (loading) return <p className="text-slate-400">Loading…</p>;
+    if (loading) {
+        return (
+            <div className="flex min-h-[30vh] items-center justify-center text-slate-500">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500/30 border-t-sky-400" />
+            </div>
+        );
+    }
 
     return (
-        <form onSubmit={save} className="max-w-2xl space-y-4">
-            <h1 className="text-2xl font-bold">Hero settings</h1>
-            <AdminCrudToolbar onReload={reload} />
-            {Object.keys(empty).map((key) => (
-                <label key={key} className="block text-sm">
-                    <span className="text-slate-400">{key}</span>
-                    {key === 'headline' ? (
-                        <textarea
-                            rows={3}
-                            placeholder={'Line 1\nLine 2 — optional second line for display'}
-                            className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 font-sans text-sm"
-                            value={form[key] ?? ''}
-                            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                        />
-                    ) : (
-                        <input
-                            className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2"
-                            value={form[key] ?? ''}
-                            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                        />
-                    )}
+        <div>
+            <AdminPageHeader
+                title="Hero"
+                description="Landing hero headline, rotating words, CTAs, and tagline — synced with the public site."
+            />
+            <form onSubmit={save} className={`${adminPanel} max-w-2xl space-y-5`}>
+                <AdminCrudToolbar onReload={reload} />
+                {Object.keys(empty).map((key) => (
+                    <label key={key} className="block">
+                        <span className={adminLabel}>{key.replace(/_/g, ' ')}</span>
+                        {key === 'headline' ? (
+                            <textarea
+                                rows={3}
+                                placeholder={'Line 1\nLine 2 — optional second line for display'}
+                                className={adminTextarea}
+                                value={form[key] ?? ''}
+                                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                            />
+                        ) : (
+                            <input
+                                className={adminInput}
+                                value={form[key] ?? ''}
+                                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                            />
+                        )}
+                    </label>
+                ))}
+                <label className="block">
+                    <span className={adminLabel}>Animated words (comma-separated)</span>
+                    <input className={adminInput} value={words} onChange={(e) => setWords(e.target.value)} />
                 </label>
-            ))}
-            <label className="block text-sm">
-                <span className="text-slate-400">Animated words (comma-separated)</span>
-                <input className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2" value={words} onChange={(e) => setWords(e.target.value)} />
-            </label>
-            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 font-semibold">
-                Save
-            </button>
-        </form>
+                <div className="pt-2">
+                    <button type="submit" className={adminPrimaryBtn}>
+                        Save hero
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 }

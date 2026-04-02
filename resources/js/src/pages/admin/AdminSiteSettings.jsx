@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { api, unwrap } from '@/services/api';
 import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import { adminInput, adminLabel, adminPrimaryBtn, adminTextarea, adminPanel, adminFileInput } from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
 
 export default function AdminSiteSettings() {
@@ -21,13 +23,7 @@ export default function AdminSiteSettings() {
     }
 
     useEffect(() => {
-        api
-            .get('/admin/site-settings')
-            .then((r) => {
-                const d = unwrap(r);
-                if (d) setForm(d);
-            })
-            .finally(() => setLoading(false));
+        reload();
     }, []);
 
     async function save(e) {
@@ -49,8 +45,6 @@ export default function AdminSiteSettings() {
         if (logo) fd.append('logo', logo);
         if (fav) fd.append('favicon', fav);
         try {
-            // POST + multipart: do not set Content-Type manually (boundary is required).
-            // PUT + multipart is unreliable in PHP; POST is registered for the same action.
             unwrap(await api.post('/admin/site-settings', fd));
             toast.success('Settings updated');
         } catch (err) {
@@ -58,42 +52,51 @@ export default function AdminSiteSettings() {
         }
     }
 
-    if (loading) return <p className="text-slate-400">Loading…</p>;
+    if (loading) {
+        return (
+            <div className="flex min-h-[30vh] items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500/30 border-t-sky-400" />
+            </div>
+        );
+    }
 
     return (
-        <form onSubmit={save} className="max-w-2xl space-y-4">
-            <h1 className="text-2xl font-bold">Site settings</h1>
-            <AdminCrudToolbar onReload={reload} />
-            {['company_name', 'email', 'phone', 'address', 'maps_embed_url', 'footer_text', 'seo_default_title', 'seo_default_description', 'seo_default_keywords'].map((key) => (
-                <label key={key} className="block text-sm">
-                    <span className="text-slate-400">{key}</span>
-                    {key.includes('description') || key === 'address' || key === 'footer_text' ? (
-                        <textarea
-                            className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2"
-                            rows={key === 'address' ? 3 : 4}
-                            value={form[key] || ''}
-                            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                        />
-                    ) : (
-                        <input
-                            className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2"
-                            value={form[key] || ''}
-                            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                        />
-                    )}
+        <div>
+            <AdminPageHeader
+                title="Site settings"
+                description="Brand, contact, SEO defaults, and assets used across the landing experience."
+            />
+            <form onSubmit={save} className={`${adminPanel} max-w-2xl space-y-5`}>
+                <AdminCrudToolbar onReload={reload} />
+                {['company_name', 'email', 'phone', 'address', 'maps_embed_url', 'footer_text', 'seo_default_title', 'seo_default_description', 'seo_default_keywords'].map((key) => (
+                    <label key={key} className="block">
+                        <span className={adminLabel}>{key.replace(/_/g, ' ')}</span>
+                        {key.includes('description') || key === 'address' || key === 'footer_text' ? (
+                            <textarea
+                                className={adminTextarea}
+                                rows={key === 'address' ? 3 : 4}
+                                value={form[key] || ''}
+                                onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                            />
+                        ) : (
+                            <input className={adminInput} value={form[key] || ''} onChange={(e) => setForm({ ...form, [key]: e.target.value })} />
+                        )}
+                    </label>
+                ))}
+                <label className="block">
+                    <span className={adminLabel}>Logo</span>
+                    <input name="logo" type="file" accept="image/*" className={adminFileInput} />
                 </label>
-            ))}
-            <label className="block text-sm">
-                <span className="text-slate-400">Logo</span>
-                <input name="logo" type="file" accept="image/*" className="mt-1 text-sm" />
-            </label>
-            <label className="block text-sm">
-                <span className="text-slate-400">Favicon</span>
-                <input name="favicon" type="file" accept="image/*" className="mt-1 text-sm" />
-            </label>
-            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 font-semibold">
-                Save
-            </button>
-        </form>
+                <label className="block">
+                    <span className={adminLabel}>Favicon</span>
+                    <input name="favicon" type="file" accept="image/*" className={adminFileInput} />
+                </label>
+                <div className="pt-2">
+                    <button type="submit" className={adminPrimaryBtn}>
+                        Save settings
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 }

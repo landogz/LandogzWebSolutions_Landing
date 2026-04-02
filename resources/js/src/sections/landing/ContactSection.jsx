@@ -59,7 +59,7 @@ export default function ContactSection({ site }) {
     const mapsQuery = site?.address ? encodeURIComponent(site.address.replace(/\n/g, ' ')) : '';
 
     return (
-        <section id="contact" className="scroll-mt-24 px-4 py-20">
+        <section id="contact" className="scroll-landing-header px-4 py-16 pb-safe sm:py-20">
             <div className="mx-auto max-w-6xl">
                 <SectionTitle
                     eyebrow="Get in touch"
@@ -72,7 +72,7 @@ export default function ContactSection({ site }) {
                     initial="hidden"
                     whileInView="show"
                     viewport={{ once: true, amount: 0.15, margin: '-48px' }}
-                    className="mt-12 grid gap-8 lg:grid-cols-5 lg:gap-10 lg:items-start"
+                    className="mt-12 grid min-w-0 gap-8 lg:grid-cols-5 lg:gap-10 lg:items-start"
                 >
                     <div className="flex flex-col lg:col-span-2">
                         <div className="rounded-3xl border border-slate-200/90 bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-950 dark:shadow-none sm:p-8">
@@ -186,7 +186,7 @@ export default function ContactSection({ site }) {
                             <p className="text-base font-semibold text-slate-900 dark:text-white">Send a message</p>
                             <input
                                 required
-                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 sm:text-sm"
                                 placeholder="Name"
                                 value={form.name}
                                 onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -194,13 +194,13 @@ export default function ContactSection({ site }) {
                             <input
                                 required
                                 type="email"
-                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 sm:text-sm"
                                 placeholder="Email"
                                 value={form.email}
                                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                             />
                             <input
-                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 sm:text-sm"
                                 placeholder="Subject"
                                 value={form.subject}
                                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
@@ -208,7 +208,7 @@ export default function ContactSection({ site }) {
                             <textarea
                                 required
                                 rows={5}
-                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 sm:text-sm"
                                 placeholder="Tell us about your project…"
                                 value={form.message}
                                 onChange={(e) => setForm({ ...form, message: e.target.value })}

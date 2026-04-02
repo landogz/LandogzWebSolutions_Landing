@@ -10,7 +10,7 @@ const codeLines = [
 
 export default function HeroVisual() {
     return (
-        <div className="relative mx-auto w-full max-w-lg pr-2 sm:pr-5 lg:max-w-none lg:pr-8">
+        <div className="relative mx-auto w-full min-w-0 max-w-lg pr-2 sm:pr-5 lg:max-w-none lg:pr-8">
             <div className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-gradient-to-tr from-sky-500/20 via-violet-600/10 to-transparent blur-3xl dark:from-sky-400/15" />
             <motion.div
                 initial={{ opacity: 0, y: 24, rotateX: 8 }}

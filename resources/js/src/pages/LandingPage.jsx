@@ -26,16 +26,19 @@ function isPlaceholderClientName(name) {
 }
 
 const serviceShell = [
-    'border-sky-500/25 bg-gradient-to-br from-sky-500/[0.08] to-transparent hover:border-sky-400/40 hover:shadow-lg hover:shadow-sky-500/10 dark:from-sky-500/10',
-    'border-violet-500/25 bg-gradient-to-br from-violet-500/[0.08] to-transparent hover:border-violet-400/40 hover:shadow-lg hover:shadow-violet-500/10 dark:from-violet-500/10',
-    'border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.08] to-transparent hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/10 dark:from-emerald-500/10',
+    'border-sky-500/25 bg-gradient-to-br from-sky-500/[0.08] to-transparent transition-[box-shadow,border-color] duration-300 hover:border-sky-400/60 hover:shadow-[0_0_32px_-8px_rgba(56,189,248,0.45)] dark:from-sky-500/10 dark:hover:shadow-[0_0_36px_-6px_rgba(56,189,248,0.35)]',
+    'border-violet-500/25 bg-gradient-to-br from-violet-500/[0.08] to-transparent transition-[box-shadow,border-color] duration-300 hover:border-violet-400/60 hover:shadow-[0_0_32px_-8px_rgba(167,139,250,0.45)] dark:from-violet-500/10 dark:hover:shadow-[0_0_36px_-6px_rgba(167,139,250,0.35)]',
+    'border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.08] to-transparent transition-[box-shadow,border-color] duration-300 hover:border-emerald-400/60 hover:shadow-[0_0_32px_-8px_rgba(52,211,153,0.45)] dark:from-emerald-500/10 dark:hover:shadow-[0_0_36px_-6px_rgba(52,211,153,0.35)]',
 ];
+
+const navIds = ['about', 'services', 'projects', 'skills', 'team', 'testimonials', 'blog', 'contact'];
 
 export default function LandingPage() {
     const { dark, toggle } = useTheme();
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState({});
     const [projectModal, setProjectModal] = useState(null);
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -92,12 +95,23 @@ export default function LandingPage() {
         };
     }, []);
 
+    useEffect(() => {
+        if (!mobileNavOpen) {
+            return undefined;
+        }
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = prev;
+        };
+    }, [mobileNavOpen]);
+
     const site = data.site;
     const title = site?.seo_default_title || site?.company_name || 'Landogz Web Solutions';
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+            <div className="flex min-h-[100dvh] min-h-[-webkit-fill-available] items-center justify-center bg-slate-950 text-slate-400">
                 <div className="h-10 w-10 border-2 border-landogz-accent border-t-transparent rounded-full animate-spin" />
             </div>
         );
@@ -112,7 +126,7 @@ export default function LandingPage() {
     const sectionViewport = { once: true, amount: 0.15, margin: '-48px' };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-landogz-navy dark:text-slate-100 transition-colors">
+        <div className="min-h-[100dvh] min-h-[-webkit-fill-available] overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-landogz-navy dark:text-slate-100 transition-colors">
             {/* Subtle page texture */}
             <div
                 className="pointer-events-none fixed inset-0 opacity-[0.4] dark:opacity-[0.25]"
@@ -128,33 +142,62 @@ export default function LandingPage() {
                 <meta name="description" content={site?.seo_default_description || ''} />
             </Helmet>
 
-            <header className="fixed top-0 inset-x-0 z-50 border-b border-slate-200/80 dark:border-white/10 bg-white/85 dark:bg-landogz-navy/85 backdrop-blur-md">
-                <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-                    <a href="#" className="flex items-center gap-2 font-display font-semibold tracking-tight">
+            <header className="fixed top-0 inset-x-0 z-50 border-b border-slate-200/80 bg-white/85 pt-safe dark:border-white/10 dark:bg-landogz-navy/85 backdrop-blur-md">
+                <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:gap-4 sm:py-3">
+                    <a
+                        href="#"
+                        className="flex min-h-[44px] min-w-0 flex-1 items-center gap-2 py-2 font-display font-semibold tracking-tight"
+                    >
                         {site?.logo_url ? (
-                            <img src={site.logo_url} alt="" className="h-9 w-auto" />
+                            <img src={site.logo_url} alt="" className="h-9 max-h-9 w-auto max-w-[140px] object-contain object-left sm:max-w-none" />
                         ) : (
-                            <span className="text-lg">{site?.company_name || 'Landogz'}</span>
+                            <span className="truncate text-base sm:text-lg">{site?.company_name || 'Landogz'}</span>
                         )}
                     </a>
-                    <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-slate-600 dark:text-slate-300">
-                        {['about', 'services', 'projects', 'skills', 'team', 'testimonials', ...(showBlogSection ? ['blog'] : []), 'contact'].map((id) => (
-                            <a key={id} href={`#${id}`} className="hover:text-sky-600 dark:hover:text-sky-400 capitalize transition-colors">
-                                {id}
-                            </a>
-                        ))}
+                    <nav className="hidden items-center gap-4 text-sm font-medium text-slate-600 dark:text-slate-300 md:flex lg:gap-5">
+                        {navIds
+                            .filter((id) => id !== 'blog' || showBlogSection)
+                            .map((id) => (
+                                <a
+                                    key={id}
+                                    href={`#${id}`}
+                                    className="rounded-md px-1 py-2 capitalize transition-colors hover:text-sky-600 dark:hover:text-sky-400"
+                                >
+                                    {id}
+                                </a>
+                            ))}
                     </nav>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setMobileNavOpen(true)}
+                            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-200 text-slate-700 md:hidden dark:border-white/15 dark:text-slate-200"
+                            aria-expanded={mobileNavOpen}
+                            aria-controls="landing-mobile-nav"
+                            aria-label="Open menu"
+                        >
+                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
                         <button
                             type="button"
                             onClick={toggle}
-                            className="rounded-lg border border-slate-200 dark:border-white/15 px-3 py-1.5 text-xs font-medium hover:bg-slate-100 dark:hover:bg-white/5"
+                            className="hidden min-h-[44px] items-center rounded-lg border border-slate-200 px-3 text-xs font-medium hover:bg-slate-100 sm:inline-flex dark:border-white/15 dark:hover:bg-white/5"
                         >
                             {dark ? 'Light' : 'Dark'}
                         </button>
+                        <button
+                            type="button"
+                            onClick={toggle}
+                            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-200 text-xs font-medium sm:hidden dark:border-white/15"
+                            aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+                        >
+                            {dark ? '☀' : '☾'}
+                        </button>
                         <a
                             href="/admin/login"
-                            className="rounded-lg bg-landogz-blue px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-blue-600"
+                            className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-landogz-blue px-3 text-[11px] font-semibold text-white shadow hover:bg-blue-600 sm:text-xs"
                         >
                             Admin
                         </a>
@@ -162,9 +205,45 @@ export default function LandingPage() {
                 </div>
             </header>
 
+            {mobileNavOpen ? (
+                <div className="fixed inset-0 z-[60] md:hidden" id="landing-mobile-nav" role="dialog" aria-modal="true" aria-label="Site sections">
+                    <button
+                        type="button"
+                        className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+                        aria-label="Close menu"
+                        onClick={() => setMobileNavOpen(false)}
+                    />
+                    <nav className="absolute right-0 top-0 flex h-full w-[min(100%,20rem)] flex-col gap-1 border-l border-slate-200 bg-white p-4 pt-[calc(1rem+env(safe-area-inset-top))] shadow-xl dark:border-white/10 dark:bg-landogz-navy">
+                        <div className="mb-2 flex items-center justify-between">
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Menu</span>
+                            <button
+                                type="button"
+                                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-slate-600 dark:text-slate-300"
+                                onClick={() => setMobileNavOpen(false)}
+                                aria-label="Close menu"
+                            >
+                                <span className="text-2xl leading-none">×</span>
+                            </button>
+                        </div>
+                        {navIds
+                            .filter((id) => id !== 'blog' || showBlogSection)
+                            .map((id) => (
+                                <a
+                                    key={id}
+                                    href={`#${id}`}
+                                    className="rounded-xl px-3 py-3 text-base font-medium capitalize text-slate-800 active:bg-slate-100 dark:text-slate-100 dark:active:bg-white/10"
+                                    onClick={() => setMobileNavOpen(false)}
+                                >
+                                    {id}
+                                </a>
+                            ))}
+                    </nav>
+                </div>
+            ) : null}
+
             <HeroSection hero={data.hero} />
 
-            <section id="about" className="scroll-mt-24 px-4 py-8 sm:py-12">
+            <section id="about" className="scroll-landing-header px-4 py-8 sm:py-12">
                 <div className="mx-auto max-w-6xl">
                     <SectionTitle
                         eyebrow="Who we are"
@@ -204,7 +283,7 @@ export default function LandingPage() {
                 initial="hidden"
                 whileInView="show"
                 viewport={sectionViewport}
-                className="scroll-mt-24 border-y border-slate-200/80 bg-slate-100/90 dark:border-white/5 dark:bg-black/25 px-4 py-16 sm:py-20"
+                className="scroll-landing-header border-y border-slate-200/80 bg-slate-100/90 dark:border-white/5 dark:bg-black/25 px-4 py-16 sm:py-20"
             >
                 <div className="mx-auto max-w-6xl">
                     <SectionTitle eyebrow="What we do" title="Services" subtitle="API-first backends, polished SPAs, and dependable delivery." />
@@ -212,8 +291,8 @@ export default function LandingPage() {
                         {(data.services || []).map((s, i) => (
                             <motion.div
                                 key={s.id}
-                                whileHover={{ y: -6 }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                whileHover={{ y: -4 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 28 }}
                                 className={`group rounded-2xl border bg-white p-7 shadow-sm dark:border-white/10 dark:bg-slate-900/90 ${serviceShell[i % serviceShell.length]}`}
                             >
                                 <div className="text-3xl text-sky-600 transition group-hover:scale-110 dark:text-sky-400">{s.icon}</div>
@@ -231,7 +310,7 @@ export default function LandingPage() {
                 initial="hidden"
                 whileInView="show"
                 viewport={sectionViewport}
-                className="scroll-mt-24 px-4 py-16 sm:py-20"
+                className="scroll-landing-header px-4 py-16 sm:py-20"
             >
                 <div className="mx-auto max-w-6xl">
                     <SectionTitle
@@ -289,7 +368,7 @@ export default function LandingPage() {
                 initial="hidden"
                 whileInView="show"
                 viewport={sectionViewport}
-                className="scroll-mt-24 border-y border-slate-200/80 bg-slate-100/90 dark:border-white/5 dark:bg-black/25 px-4 py-16 sm:py-20"
+                className="scroll-landing-header border-y border-slate-200/80 bg-slate-100/90 dark:border-white/5 dark:bg-black/25 px-4 py-16 sm:py-20"
             >
                 <div className="mx-auto max-w-6xl">
                     <SectionTitle
@@ -328,7 +407,7 @@ export default function LandingPage() {
                 initial="hidden"
                 whileInView="show"
                 viewport={sectionViewport}
-                className="scroll-mt-24 px-4 py-16 sm:py-20"
+                className="scroll-landing-header px-4 py-16 sm:py-20"
             >
                 <div className="mx-auto max-w-6xl">
                     <SectionTitle eyebrow="People" title="Our Team" subtitle="Engineers who care about architecture, UX, and shipping on time." />
@@ -339,7 +418,7 @@ export default function LandingPage() {
                                 whileHover={{ y: -4 }}
                                 className="rounded-2xl border border-slate-200/90 bg-white/90 p-6 text-center shadow-sm dark:border-white/10 dark:bg-slate-900/85"
                             >
-                                <TeamAvatar name={m.name} photoUrl={m.photo_url} size={104} variant={mi} />
+                                <TeamAvatar name={m.name} photoUrl={m.photo_url} size={104} variant={mi} illustrationOnly />
                                 <h3 className="font-display mt-5 text-lg font-semibold">{m.name}</h3>
                                 <p className="text-sm text-sky-700 dark:text-sky-400">{m.position}</p>
                                 <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{m.bio}</p>
@@ -355,7 +434,7 @@ export default function LandingPage() {
                 initial="hidden"
                 whileInView="show"
                 viewport={sectionViewport}
-                className="scroll-mt-24 border-y border-slate-200/80 bg-gradient-to-b from-slate-100/90 to-slate-50 dark:border-white/5 dark:from-black/30 dark:to-landogz-navy px-4 py-16 sm:py-20"
+                className="scroll-landing-header border-y border-slate-200/80 bg-gradient-to-b from-slate-100/90 to-slate-50 dark:border-white/5 dark:from-black/30 dark:to-landogz-navy px-4 py-16 sm:py-20"
             >
                 <div className="mx-auto max-w-6xl">
                     <SectionTitle eyebrow="Social proof" title="Testimonials" subtitle="Teams we’ve shipped with — in their words." />
@@ -398,7 +477,7 @@ export default function LandingPage() {
             ) : null}
 
             {showBlogSection ? (
-                <section id="blog" className="scroll-mt-24 px-4 py-16 sm:py-20">
+                <section id="blog" className="scroll-landing-header px-4 py-16 sm:py-20">
                     <div className="mx-auto max-w-6xl">
                         <SectionTitle eyebrow="Writing" title="Latest from the blog" subtitle="Notes on Laravel, React, and shipping with confidence." />
                         <motion.div
@@ -469,8 +548,12 @@ export default function LandingPage() {
             <LandingFooter site={site} tagline={footerTagline} />
 
             {projectModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog">
-                    <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-white p-6 shadow-2xl dark:border-white/15 dark:bg-slate-950">
+                <div
+                    className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-4 pb-safe backdrop-blur-sm sm:items-center sm:pb-4"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <div className="max-h-[min(88dvh,100vh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-t-2xl border border-white/10 bg-white p-5 shadow-2xl sm:rounded-2xl sm:p-6 dark:border-white/15 dark:bg-slate-950">
                         {projectModal.thumbnail_url ? (
                             <img src={projectModal.thumbnail_url} alt="" className="mb-4 max-h-56 w-full rounded-xl object-cover" />
                         ) : (
@@ -480,7 +563,12 @@ export default function LandingPage() {
                         )}
                         <div className="flex justify-between gap-4">
                             <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white">{projectModal.title}</h3>
-                            <button type="button" className="text-slate-500 hover:text-slate-800 dark:hover:text-white" onClick={() => setProjectModal(null)}>
+                            <button
+                                type="button"
+                                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-white/10 dark:hover:text-white"
+                                onClick={() => setProjectModal(null)}
+                                aria-label="Close"
+                            >
                                 ✕
                             </button>
                         </div>

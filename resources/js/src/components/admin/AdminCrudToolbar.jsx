@@ -1,16 +1,15 @@
+import { adminSecondaryBtn, adminPrimaryBtn } from '@/components/admin/adminTheme';
+
 export default function AdminCrudToolbar({ onReload, onCreate, createLabel = 'Create' }) {
     return (
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-            <button
-                type="button"
-                className="rounded-lg border border-white/20 px-3 py-1.5 text-sm text-slate-200 hover:bg-white/5"
-                onClick={onReload}
-            >
-                Reload
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+            <button type="button" className={adminSecondaryBtn} onClick={onReload}>
+                <span className="mr-2 inline-block h-2 w-2 rounded-full bg-emerald-400/80" aria-hidden />
+                Reload data
             </button>
             {onCreate ? (
-                <button type="button" className="rounded-lg bg-landogz-blue px-3 py-1.5 text-sm font-medium" onClick={onCreate}>
-                    {createLabel}
+                <button type="button" className={adminPrimaryBtn} onClick={onCreate}>
+                    + {createLabel}
                 </button>
             ) : null}
         </div>

@@ -4,9 +4,25 @@ import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import {
+    adminInput,
+    adminLabel,
+    adminPrimaryBtn,
+    adminSecondaryBtn,
+    adminSelect,
+    adminTextarea,
+    adminFileInput,
+    adminTableShell,
+    adminTableHead,
+    adminTh,
+    adminTd,
+    adminBadge,
+    adminPaginationBtn,
+    adminTextLink,
+    adminTextLinkDanger,
+} from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
-
-const inp = 'mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm';
 
 const empty = {
     project_category_id: '',
@@ -175,56 +191,72 @@ export default function AdminProjects() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold">Projects</h1>
+            <AdminPageHeader
+                title="Projects"
+                description="Portfolio case studies, media, tech stack, and publish state — mirrored on the public work grid."
+            />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} />
 
             <input
-                className="mt-4 w-full max-w-md rounded-lg border border-white/15 bg-slate-900 px-3 py-2 text-sm"
-                placeholder="Search…"
+                className={`${adminInput} mt-4 max-w-md`}
+                placeholder="Search projects…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
             />
 
-            <div className="mt-6 overflow-x-auto rounded-xl border border-white/10">
+            <div className={`${adminTableShell} mt-6`}>
                 <table className="min-w-full text-sm">
-                    <thead className="bg-white/5 text-left text-slate-400">
+                    <thead className={adminTableHead}>
                         <tr>
-                            <th className="p-3">Title</th>
-                            <th className="p-3">Status</th>
-                            <th className="p-3">Featured</th>
-                            <th className="p-3 text-right">Actions</th>
+                            <th className={adminTh}>Title</th>
+                            <th className={adminTh}>Status</th>
+                            <th className={adminTh}>Featured</th>
+                            <th className={`${adminTh} text-right`}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {rows.map((p) => (
-                            <tr key={p.id} className="border-t border-white/5">
-                                <td className="p-3">{p.title}</td>
-                                <td className="p-3">{p.status}</td>
-                                <td className="p-3">{p.is_featured ? 'Yes' : 'No'}</td>
-                                <td className="p-3 text-right">
-                                    <button type="button" className="mr-2 text-landogz-accent" onClick={() => openEdit(p)}>
-                                        Edit
-                                    </button>
-                                    <button type="button" className="text-red-400 hover:underline" onClick={() => setDeleteId(p.id)}>
-                                        Delete
-                                    </button>
+                        {rows.length === 0 ? (
+                            <tr>
+                                <td colSpan={4} className={`${adminTd} py-12 text-center text-slate-500`}>
+                                    No projects match your filters.
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            rows.map((p) => (
+                                <tr key={p.id} className="transition hover:bg-white/[0.02]">
+                                    <td className={adminTd}>
+                                        <span className="font-medium text-slate-200">{p.title}</span>
+                                    </td>
+                                    <td className={adminTd}>
+                                        <span className={adminBadge}>{p.status}</span>
+                                    </td>
+                                    <td className={adminTd}>{p.is_featured ? 'Yes' : 'No'}</td>
+                                    <td className={`${adminTd} text-right`}>
+                                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(p)}>
+                                            Edit
+                                        </button>
+                                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(p.id)}>
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
-            <div className="mt-4 flex gap-2">
-                <button type="button" disabled={page <= 1} className="rounded border border-white/15 px-3 py-1" onClick={() => setPage((p) => Math.max(1, p - 1))}>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+                <button type="button" disabled={page <= 1} className={adminPaginationBtn} onClick={() => setPage((p) => Math.max(1, p - 1))}>
                     Prev
                 </button>
-                <span className="text-slate-400">
-                    Page {meta.current_page || page} / {meta.last_page || 1}
+                <span className="text-sm text-slate-500">
+                    Page <span className="tabular-nums text-slate-300">{meta.current_page || page}</span> /{' '}
+                    <span className="tabular-nums">{meta.last_page || 1}</span>
                 </span>
                 <button
                     type="button"
                     disabled={(meta.current_page || page) >= (meta.last_page || 1)}
-                    className="rounded border border-white/15 px-3 py-1"
+                    className={adminPaginationBtn}
                     onClick={() => setPage((p) => p + 1)}
                 >
                     Next
@@ -233,11 +265,11 @@ export default function AdminProjects() {
 
             {modal ? (
                 <AdminModal title={editing ? 'Edit project' : 'Create project'} onClose={() => setModal(false)} wide>
-                    <form onSubmit={save} className="space-y-3">
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Category</span>
+                    <form onSubmit={save} className="space-y-4">
+                        <label className="block">
+                            <span className={adminLabel}>Category</span>
                             <select
-                                className={inp}
+                                className={adminSelect}
                                 value={form.project_category_id}
                                 onChange={(e) => setForm({ ...form, project_category_id: e.target.value })}
                             >
@@ -249,83 +281,80 @@ export default function AdminProjects() {
                                 ))}
                             </select>
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Title</span>
-                            <input className={inp} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+                        <label className="block">
+                            <span className={adminLabel}>Title</span>
+                            <input className={adminInput} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Slug (optional)</span>
-                            <input className={inp} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Slug (optional)</span>
+                            <input className={adminInput} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Short description</span>
-                            <input className={inp} value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Short description</span>
+                            <input className={adminInput} value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Full description</span>
-                            <textarea className={inp} rows={5} value={form.full_description} onChange={(e) => setForm({ ...form, full_description: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Full description</span>
+                            <textarea className={adminTextarea} rows={5} value={form.full_description} onChange={(e) => setForm({ ...form, full_description: e.target.value })} />
                         </label>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Status</span>
-                                <select className={inp} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="block">
+                                <span className={adminLabel}>Status</span>
+                                <select className={adminSelect} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
                                     <option value="draft">draft</option>
                                     <option value="published">published</option>
                                 </select>
                             </label>
-                            <label className="flex items-center gap-2 pt-6 text-sm">
+                            <label className="flex min-h-[44px] items-center gap-3 pt-6 text-sm text-slate-300">
                                 <input
                                     type="checkbox"
+                                    className="h-4 w-4 rounded border-white/20 bg-slate-900 text-sky-500 focus:ring-sky-500/30"
                                     checked={form.is_featured}
                                     onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
                                 />
                                 Featured
                             </label>
                         </div>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Tech stack (comma-separated)</span>
-                            <input className={inp} value={form.tech_stack} onChange={(e) => setForm({ ...form, tech_stack: e.target.value })} />
+                        <label className="block">
+                            <span className={adminLabel}>Tech stack (comma-separated)</span>
+                            <input className={adminInput} value={form.tech_stack} onChange={(e) => setForm({ ...form, tech_stack: e.target.value })} />
                         </label>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Client name</span>
-                                <input className={inp} value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} />
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="block">
+                                <span className={adminLabel}>Client name</span>
+                                <input className={adminInput} value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} />
                             </label>
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Duration</span>
-                                <input className={inp} value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} />
+                            <label className="block">
+                                <span className={adminLabel}>Duration</span>
+                                <input className={adminInput} value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} />
                             </label>
                         </div>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="block text-sm">
-                                <span className="text-slate-400">Project URL</span>
-                                <input className={inp} value={form.project_url} onChange={(e) => setForm({ ...form, project_url: e.target.value })} />
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="block">
+                                <span className={adminLabel}>Project URL</span>
+                                <input className={adminInput} value={form.project_url} onChange={(e) => setForm({ ...form, project_url: e.target.value })} />
                             </label>
-                            <label className="block text-sm">
-                                <span className="text-slate-400">GitHub URL</span>
-                                <input className={inp} value={form.github_url} onChange={(e) => setForm({ ...form, github_url: e.target.value })} />
+                            <label className="block">
+                                <span className={adminLabel}>GitHub URL</span>
+                                <input className={adminInput} value={form.github_url} onChange={(e) => setForm({ ...form, github_url: e.target.value })} />
                             </label>
                         </div>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Thumbnail</span>
-                            <input type="file" accept="image/*" className="mt-1 text-sm" onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)} />
+                        <label className="block">
+                            <span className={adminLabel}>Thumbnail</span>
+                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)} />
                         </label>
-                        <label className="block text-sm">
-                            <span className="text-slate-400">Add gallery images</span>
-                            <input type="file" accept="image/*" multiple className="mt-1 text-sm" onChange={(e) => setGalleryFiles(e.target.files ? Array.from(e.target.files) : [])} />
+                        <label className="block">
+                            <span className={adminLabel}>Add gallery images</span>
+                            <input type="file" accept="image/*" multiple className={adminFileInput} onChange={(e) => setGalleryFiles(e.target.files ? Array.from(e.target.files) : [])} />
                         </label>
                         {editing && editing.gallery_paths?.length ? (
-                            <div className="text-sm">
-                                <span className="text-slate-400">Current gallery</span>
-                                <ul className="mt-1 space-y-1">
+                            <div>
+                                <span className={adminLabel}>Current gallery</span>
+                                <ul className="mt-2 space-y-2">
                                     {editing.gallery_paths.map((path) => (
-                                        <li key={path} className="flex flex-wrap items-center justify-between gap-2 rounded border border-white/10 px-2 py-1">
+                                        <li key={path} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-2">
                                             <span className="truncate text-xs text-slate-500">{path}</span>
-                                            <button
-                                                type="button"
-                                                className="text-xs text-red-400"
-                                                onClick={() => removeGalleryPath(editing.id, path)}
-                                            >
+                                            <button type="button" className={adminTextLinkDanger} onClick={() => removeGalleryPath(editing.id, path)}>
                                                 Remove
                                             </button>
                                         </li>
@@ -333,11 +362,11 @@ export default function AdminProjects() {
                                 </ul>
                             </div>
                         ) : null}
-                        <div className="flex gap-2 pt-2">
-                            <button type="submit" className="rounded-lg bg-landogz-blue px-4 py-2 text-sm font-medium">
+                        <div className="flex flex-wrap gap-3 pt-2">
+                            <button type="submit" className={adminPrimaryBtn}>
                                 Save
                             </button>
-                            <button type="button" className="rounded-lg border border-white/15 px-4 py-2 text-sm" onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
                                 Cancel
                             </button>
                         </div>
