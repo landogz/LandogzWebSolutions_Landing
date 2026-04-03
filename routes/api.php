@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\Admin\SiteSettingAdminController;
 use App\Http\Controllers\Api\V1\Admin\SkillAdminController;
 use App\Http\Controllers\Api\V1\Admin\TeamMemberAdminController;
 use App\Http\Controllers\Api\V1\Admin\TestimonialAdminController;
+use App\Http\Controllers\Api\V1\Admin\UserAdminController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\Public\AboutPublicController;
@@ -80,6 +81,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/site-settings', [SiteSettingAdminController::class, 'show']);
             Route::put('/site-settings', [SiteSettingAdminController::class, 'update']);
             Route::post('/site-settings', [SiteSettingAdminController::class, 'update']);
+
+            Route::middleware('super_admin')->group(function () {
+                Route::apiResource('users', UserAdminController::class);
+            });
         });
     });
 });

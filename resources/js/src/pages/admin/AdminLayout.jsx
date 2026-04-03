@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { api } from '@/services/api';
+import { api, unwrap } from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
 
-const navGroups = [
+function buildNavGroups(role) {
+    const overviewItems = [
+        { label: 'Dashboard', to: '/admin', end: true },
+        ...(role === 'super_admin' ? [{ label: 'Users', to: '/admin/users' }] : []),
+    ];
+    return [
     {
         title: 'Overview',
-        items: [{ label: 'Dashboard', to: '/admin', end: true }],
+        items: overviewItems,
     },
     {
         title: 'Site & content',
@@ -39,8 +44,12 @@ const navGroups = [
         ],
     },
 ];
+}
+
 
 function NavItems({ onNavigate }) {
+    const role = useAuthStore((s) => s.user?.role);
+    const navGroups = buildNavGroups(role);
     return (
         <>
             {navGroups.map((group) => (
@@ -78,8 +87,33 @@ function NavItems({ onNavigate }) {
 export default function AdminLayout() {
     const nav = useNavigate();
     const logout = useAuthStore((s) => s.logout);
+    const setAuth = useAuthStore((s) => s.setAuth);
     const user = useAuthStore((s) => s.user);
+    const token = useAuthStore((s) => s.token);
     const [mobileOpen, setMobileOpen] = useState(false);
+
+    useEffect(() => {
+        if (!token || user) {
+            return undefined;
+        }
+        let cancelled = false;
+        (async () => {
+            try {
+                const u = unwrap(await api.get('/auth/me'));
+                if (!cancelled) {
+                    setAuth(token, u);
+                }
+            } catch {
+                if (!cancelled) {
+                    logout();
+                    nav('/admin/login');
+                }
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [token, user, setAuth, logout, nav]);
 
     useEffect(() => {
         if (!mobileOpen) return undefined;

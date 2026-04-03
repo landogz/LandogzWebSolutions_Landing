@@ -17,7 +17,9 @@ import AdminTestimonials from '@/pages/admin/AdminTestimonials';
 import AdminAboutStats from '@/pages/admin/AdminAboutStats';
 import AdminCompanyValues from '@/pages/admin/AdminCompanyValues';
 import AdminCategories from '@/pages/admin/AdminCategories';
+import AdminUsers from '@/pages/admin/AdminUsers';
 import PrivateRoute from '@/components/PrivateRoute';
+import SuperAdminRoute from '@/components/SuperAdminRoute';
 
 export default function App() {
     return (
@@ -47,6 +49,14 @@ export default function App() {
                 <Route path="about-stats" element={<AdminAboutStats />} />
                 <Route path="company-values" element={<AdminCompanyValues />} />
                 <Route path="categories" element={<AdminCategories />} />
+                <Route
+                    path="users"
+                    element={
+                        <SuperAdminRoute>
+                            <AdminUsers />
+                        </SuperAdminRoute>
+                    }
+                />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
