@@ -30,6 +30,14 @@ function buildClientFormData(form, logoFile) {
     return fd;
 }
 
+function buildClientJsonBody(form) {
+    return {
+        company_name: form.company_name,
+        website_url: form.website_url || '',
+        sort_order: Number(form.sort_order) || 0,
+    };
+}
+
 export default function AdminClients() {
     const [rows, setRows] = useState([]);
     const [modal, setModal] = useState(false);
@@ -76,13 +84,19 @@ export default function AdminClients() {
 
     async function save(e) {
         e.preventDefault();
-        const fd = buildClientFormData(form, logoFile);
         try {
             if (editing) {
-                unwrap(await api.post(`/admin/clients/${editing.id}`, fd));
+                if (logoFile) {
+                    unwrap(await api.post(`/admin/clients/${editing.id}`, buildClientFormData(form, logoFile)));
+                } else {
+                    unwrap(await api.put(`/admin/clients/${editing.id}`, buildClientJsonBody(form)));
+                }
                 toast.success('Client updated');
+            } else if (logoFile) {
+                unwrap(await api.post('/admin/clients', buildClientFormData(form, logoFile)));
+                toast.success('Client created');
             } else {
-                unwrap(await api.post('/admin/clients', fd));
+                unwrap(await api.post('/admin/clients', buildClientJsonBody(form)));
                 toast.success('Client created');
             }
             setModal(false);

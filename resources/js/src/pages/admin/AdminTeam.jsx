@@ -52,6 +52,21 @@ function buildTeamFormData(form, photoFile) {
     return fd;
 }
 
+/** JSON body for create/update when no new photo — avoids empty multipart bodies on some PHP hosts. */
+function buildTeamJsonBody(form) {
+    return {
+        name: form.name,
+        position: form.position || '',
+        bio: form.bio || '',
+        sort_order: Number(form.sort_order) || 0,
+        social_links: {
+            linkedin: form.linkedin || '',
+            github: form.github || '',
+            twitter: form.twitter || '',
+        },
+    };
+}
+
 export default function AdminTeam() {
     const [rows, setRows] = useState([]);
     const [meta, setMeta] = useState({});
@@ -109,13 +124,19 @@ export default function AdminTeam() {
 
     async function save(e) {
         e.preventDefault();
-        const fd = buildTeamFormData(form, photoFile);
         try {
             if (editing) {
-                unwrap(await api.post(`/admin/team-members/${editing.id}`, fd));
+                if (photoFile) {
+                    unwrap(await api.post(`/admin/team-members/${editing.id}`, buildTeamFormData(form, photoFile)));
+                } else {
+                    unwrap(await api.put(`/admin/team-members/${editing.id}`, buildTeamJsonBody(form)));
+                }
                 toast.success('Team member updated');
+            } else if (photoFile) {
+                unwrap(await api.post('/admin/team-members', buildTeamFormData(form, photoFile)));
+                toast.success('Team member created');
             } else {
-                unwrap(await api.post('/admin/team-members', fd));
+                unwrap(await api.post('/admin/team-members', buildTeamJsonBody(form)));
                 toast.success('Team member created');
             }
             setModal(false);

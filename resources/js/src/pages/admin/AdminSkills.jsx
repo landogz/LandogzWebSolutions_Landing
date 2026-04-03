@@ -39,6 +39,15 @@ function buildSkillFormData(form, iconFile) {
     return fd;
 }
 
+function buildSkillJsonBody(form) {
+    return {
+        name: form.name,
+        category: form.category,
+        proficiency: Number(form.proficiency) || 0,
+        sort_order: Number(form.sort_order) || 0,
+    };
+}
+
 export default function AdminSkills() {
     const [rows, setRows] = useState([]);
     const [meta, setMeta] = useState({});
@@ -85,13 +94,19 @@ export default function AdminSkills() {
 
     async function save(e) {
         e.preventDefault();
-        const fd = buildSkillFormData(form, iconFile);
         try {
             if (editing) {
-                unwrap(await api.post(`/admin/skills/${editing.id}`, fd));
+                if (iconFile) {
+                    unwrap(await api.post(`/admin/skills/${editing.id}`, buildSkillFormData(form, iconFile)));
+                } else {
+                    unwrap(await api.put(`/admin/skills/${editing.id}`, buildSkillJsonBody(form)));
+                }
                 toast.success('Skill updated');
+            } else if (iconFile) {
+                unwrap(await api.post('/admin/skills', buildSkillFormData(form, iconFile)));
+                toast.success('Skill created');
             } else {
-                unwrap(await api.post('/admin/skills', fd));
+                unwrap(await api.post('/admin/skills', buildSkillJsonBody(form)));
                 toast.success('Skill created');
             }
             setModal(false);

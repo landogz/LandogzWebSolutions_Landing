@@ -42,6 +42,17 @@ function buildTestimonialFormData(form, photoFile) {
     return fd;
 }
 
+function buildTestimonialJsonBody(form) {
+    return {
+        client_name: form.client_name,
+        company: form.company || '',
+        message: form.message,
+        rating: Number(form.rating) || 5,
+        status: form.status,
+        sort_order: Number(form.sort_order) || 0,
+    };
+}
+
 export default function AdminTestimonials() {
     const [rows, setRows] = useState([]);
     const [modal, setModal] = useState(false);
@@ -91,13 +102,19 @@ export default function AdminTestimonials() {
 
     async function save(e) {
         e.preventDefault();
-        const fd = buildTestimonialFormData(form, photoFile);
         try {
             if (editing) {
-                unwrap(await api.post(`/admin/testimonials/${editing.id}`, fd));
+                if (photoFile) {
+                    unwrap(await api.post(`/admin/testimonials/${editing.id}`, buildTestimonialFormData(form, photoFile)));
+                } else {
+                    unwrap(await api.put(`/admin/testimonials/${editing.id}`, buildTestimonialJsonBody(form)));
+                }
                 toast.success('Testimonial updated');
+            } else if (photoFile) {
+                unwrap(await api.post('/admin/testimonials', buildTestimonialFormData(form, photoFile)));
+                toast.success('Testimonial created');
             } else {
-                unwrap(await api.post('/admin/testimonials', fd));
+                unwrap(await api.post('/admin/testimonials', buildTestimonialJsonBody(form)));
                 toast.success('Testimonial created');
             }
             setModal(false);

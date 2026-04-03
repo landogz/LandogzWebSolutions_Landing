@@ -60,11 +60,14 @@ class TeamMemberAdminController extends Controller
     public function update(UpdateTeamMemberRequest $request, TeamMember $teamMember): JsonResponse
     {
         $data = $request->validated();
+        unset($data['photo']);
         if ($request->hasFile('photo')) {
             $this->images->delete($teamMember->photo_path);
             $data['photo_path'] = $this->images->storeAndOptimize($request->file('photo'), 'team/photos');
         }
-        unset($data['photo']);
+        if ($data === []) {
+            return $this->error('No valid fields were submitted.', [], 422);
+        }
         $teamMember->update($data);
 
         return $this->success(new TeamMemberResource($teamMember->fresh()), 'Team member updated.');

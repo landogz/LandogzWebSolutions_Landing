@@ -61,6 +61,29 @@ function buildBlogFormData(form, featuredFile) {
     return fd;
 }
 
+function buildBlogJsonBody(form) {
+    const tags = form.tags
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    const body = {
+        title: form.title,
+        category: form.category || '',
+        tags,
+        content: form.content || '',
+        excerpt: form.excerpt || '',
+        author: form.author || '',
+        status: form.status,
+    };
+    if (form.slug?.trim()) {
+        body.slug = form.slug.trim();
+    }
+    if (form.published_at) {
+        body.published_at = form.published_at;
+    }
+    return body;
+}
+
 export default function AdminBlog() {
     const [rows, setRows] = useState([]);
     const [meta, setMeta] = useState({});
@@ -127,13 +150,19 @@ export default function AdminBlog() {
 
     async function save(e) {
         e.preventDefault();
-        const fd = buildBlogFormData(form, featuredFile);
         try {
             if (editing) {
-                unwrap(await api.post(`/admin/blog-posts/${editing.id}`, fd));
+                if (featuredFile) {
+                    unwrap(await api.post(`/admin/blog-posts/${editing.id}`, buildBlogFormData(form, featuredFile)));
+                } else {
+                    unwrap(await api.put(`/admin/blog-posts/${editing.id}`, buildBlogJsonBody(form)));
+                }
                 toast.success('Post updated');
+            } else if (featuredFile) {
+                unwrap(await api.post('/admin/blog-posts', buildBlogFormData(form, featuredFile)));
+                toast.success('Post created');
             } else {
-                unwrap(await api.post('/admin/blog-posts', fd));
+                unwrap(await api.post('/admin/blog-posts', buildBlogJsonBody(form)));
                 toast.success('Post created');
             }
             setModal(false);

@@ -72,6 +72,32 @@ function buildProjectFormData(form, thumbnailFile, galleryFiles) {
     return fd;
 }
 
+function buildProjectJsonBody(form) {
+    const stack = form.tech_stack
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    const body = {
+        title: form.title,
+        short_description: form.short_description || '',
+        full_description: form.full_description || '',
+        status: form.status,
+        is_featured: !!form.is_featured,
+        client_name: form.client_name || '',
+        project_url: form.project_url || '',
+        github_url: form.github_url || '',
+        duration: form.duration || '',
+        tech_stack: stack,
+    };
+    if (form.project_category_id) {
+        body.project_category_id = Number(form.project_category_id);
+    }
+    if (form.slug?.trim()) {
+        body.slug = form.slug.trim();
+    }
+    return body;
+}
+
 export default function AdminProjects() {
     const [rows, setRows] = useState([]);
     const [page, setPage] = useState(1);
@@ -151,13 +177,25 @@ export default function AdminProjects() {
 
     async function save(e) {
         e.preventDefault();
-        const fd = buildProjectFormData(form, thumbnailFile, galleryFiles);
+        const needsMultipart = Boolean(thumbnailFile) || (galleryFiles?.length > 0);
         try {
             if (editing) {
-                unwrap(await api.post(`/admin/projects/${editing.id}`, fd));
+                if (needsMultipart) {
+                    unwrap(
+                        await api.post(
+                            `/admin/projects/${editing.id}`,
+                            buildProjectFormData(form, thumbnailFile, galleryFiles),
+                        ),
+                    );
+                } else {
+                    unwrap(await api.put(`/admin/projects/${editing.id}`, buildProjectJsonBody(form)));
+                }
                 toast.success('Project updated');
+            } else if (needsMultipart) {
+                unwrap(await api.post('/admin/projects', buildProjectFormData(form, thumbnailFile, galleryFiles)));
+                toast.success('Project created');
             } else {
-                unwrap(await api.post('/admin/projects', fd));
+                unwrap(await api.post('/admin/projects', buildProjectJsonBody(form)));
                 toast.success('Project created');
             }
             setModal(false);
