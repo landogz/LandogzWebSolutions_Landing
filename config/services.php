@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    /*
+    | Google AdSense — publisher client id (ca-pub-xxxxxxxxxxxxxxxx).
+    | Set ADSENSE_CLIENT_ID in .env to override, or leave empty to disable the loader script.
+    */
+    'adsense' => [
+        'client_id' => env('ADSENSE_CLIENT_ID', 'ca-pub-9589696862204548'),
+    ],
+
 ];
