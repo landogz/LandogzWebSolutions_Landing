@@ -112,7 +112,7 @@ export default function AdminTeam() {
         const fd = buildTeamFormData(form, photoFile);
         try {
             if (editing) {
-                unwrap(await api.put(`/admin/team-members/${editing.id}`, fd));
+                unwrap(await api.post(`/admin/team-members/${editing.id}`, fd));
                 toast.success('Team member updated');
             } else {
                 unwrap(await api.post('/admin/team-members', fd));

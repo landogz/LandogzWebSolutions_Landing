@@ -130,7 +130,7 @@ export default function AdminBlog() {
         const fd = buildBlogFormData(form, featuredFile);
         try {
             if (editing) {
-                unwrap(await api.put(`/admin/blog-posts/${editing.id}`, fd));
+                unwrap(await api.post(`/admin/blog-posts/${editing.id}`, fd));
                 toast.success('Post updated');
             } else {
                 unwrap(await api.post('/admin/blog-posts', fd));

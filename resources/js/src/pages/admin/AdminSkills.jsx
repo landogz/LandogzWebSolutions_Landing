@@ -88,7 +88,7 @@ export default function AdminSkills() {
         const fd = buildSkillFormData(form, iconFile);
         try {
             if (editing) {
-                unwrap(await api.put(`/admin/skills/${editing.id}`, fd));
+                unwrap(await api.post(`/admin/skills/${editing.id}`, fd));
                 toast.success('Skill updated');
             } else {
                 unwrap(await api.post('/admin/skills', fd));

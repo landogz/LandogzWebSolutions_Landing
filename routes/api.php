@@ -82,6 +82,17 @@ Route::prefix('v1')->group(function () {
             Route::put('/site-settings', [SiteSettingAdminController::class, 'update']);
             Route::post('/site-settings', [SiteSettingAdminController::class, 'update']);
 
+            /*
+             * Multipart updates via POST (same controller as PUT). Many PHP / hosting stacks do not
+             * populate multipart bodies for PUT, so axios.put(FormData) silently saves nothing.
+             */
+            Route::post('team-members/{team_member}', [TeamMemberAdminController::class, 'update']);
+            Route::post('skills/{skill}', [SkillAdminController::class, 'update']);
+            Route::post('projects/{project}', [ProjectAdminController::class, 'update']);
+            Route::post('blog-posts/{blog_post}', [BlogPostAdminController::class, 'update']);
+            Route::post('testimonials/{testimonial}', [TestimonialAdminController::class, 'update']);
+            Route::post('clients/{client}', [ClientAdminController::class, 'update']);
+
             Route::middleware('super_admin')->group(function () {
                 Route::apiResource('users', UserAdminController::class);
             });

@@ -94,7 +94,7 @@ export default function AdminTestimonials() {
         const fd = buildTestimonialFormData(form, photoFile);
         try {
             if (editing) {
-                unwrap(await api.put(`/admin/testimonials/${editing.id}`, fd));
+                unwrap(await api.post(`/admin/testimonials/${editing.id}`, fd));
                 toast.success('Testimonial updated');
             } else {
                 unwrap(await api.post('/admin/testimonials', fd));

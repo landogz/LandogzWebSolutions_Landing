@@ -154,7 +154,7 @@ export default function AdminProjects() {
         const fd = buildProjectFormData(form, thumbnailFile, galleryFiles);
         try {
             if (editing) {
-                unwrap(await api.put(`/admin/projects/${editing.id}`, fd));
+                unwrap(await api.post(`/admin/projects/${editing.id}`, fd));
                 toast.success('Project updated');
             } else {
                 unwrap(await api.post('/admin/projects', fd));

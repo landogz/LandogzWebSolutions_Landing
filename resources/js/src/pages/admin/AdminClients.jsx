@@ -79,7 +79,7 @@ export default function AdminClients() {
         const fd = buildClientFormData(form, logoFile);
         try {
             if (editing) {
-                unwrap(await api.put(`/admin/clients/${editing.id}`, fd));
+                unwrap(await api.post(`/admin/clients/${editing.id}`, fd));
                 toast.success('Client updated');
             } else {
                 unwrap(await api.post('/admin/clients', fd));
