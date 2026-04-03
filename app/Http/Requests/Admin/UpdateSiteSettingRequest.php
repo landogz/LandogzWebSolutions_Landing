@@ -26,6 +26,10 @@ class UpdateSiteSettingRequest extends FormRequest
             'seo_default_title' => ['nullable', 'string', 'max:255'],
             'seo_default_description' => ['nullable', 'string', 'max:5000'],
             'seo_default_keywords' => ['nullable', 'string', 'max:500'],
+            'seo_og_image' => ['nullable', 'image', 'max:5120'],
+            'seo_robots' => ['nullable', 'string', 'max:160'],
+            'seo_twitter_handle' => ['nullable', 'string', 'max:64'],
+            'seo_canonical_base_url' => ['nullable', 'string', 'max:512'],
             'seo_per_page' => ['nullable'],
         ];
     }

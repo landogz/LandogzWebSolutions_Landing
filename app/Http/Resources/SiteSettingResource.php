@@ -26,6 +26,11 @@ class SiteSettingResource extends JsonResource
             'seo_default_title' => $this->seo_default_title,
             'seo_default_description' => $this->seo_default_description,
             'seo_default_keywords' => $this->seo_default_keywords,
+            'seo_og_image_path' => $this->seo_og_image_path,
+            'seo_og_image_url' => MediaHelper::publicUrl($this->seo_og_image_path),
+            'seo_robots' => $this->seo_robots,
+            'seo_twitter_handle' => $this->seo_twitter_handle,
+            'seo_canonical_base_url' => $this->seo_canonical_base_url,
             'seo_per_page' => $this->seo_per_page ?? [],
         ];
     }

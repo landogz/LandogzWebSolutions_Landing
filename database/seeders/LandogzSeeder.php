@@ -342,6 +342,7 @@ class LandogzSeeder extends Seeder
             'seo_default_title' => 'Landogz Web Solution | Laravel · React · WordPress · Shopify',
             'seo_default_description' => 'Senior web developer in Botolan, Zambales — Laravel, React, WordPress, Shopify, and API integrations for clients worldwide.',
             'seo_default_keywords' => 'laravel developer philippines, react developer, wordpress, shopify, zambales, remote web developer',
+            'seo_robots' => 'index, follow',
         ]);
 
         ContactMessage::query()->create([

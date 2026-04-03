@@ -108,6 +108,11 @@ export default function LandingPage() {
 
     const site = data.site;
     const title = site?.seo_default_title || site?.company_name || 'Landogz Web Solutions';
+    const desc = site?.seo_default_description || '';
+    const baseUrl = (site?.seo_canonical_base_url || '').replace(/\/$/, '');
+    const pathname = typeof window !== 'undefined' ? window.location.pathname || '/' : '/';
+    const canonicalHref = baseUrl ? `${baseUrl}${pathname === '/' ? '/' : pathname}` : undefined;
+    const ogImage = site?.seo_og_image_url || site?.logo_url || '';
 
     if (loading) {
         return (
@@ -139,7 +144,26 @@ export default function LandingPage() {
 
             <Helmet>
                 <title>{title}</title>
-                <meta name="description" content={site?.seo_default_description || ''} />
+                <meta name="description" content={desc} />
+                {site?.seo_default_keywords ? <meta name="keywords" content={site.seo_default_keywords} /> : null}
+                {site?.seo_robots ? <meta name="robots" content={site.seo_robots} /> : null}
+                {canonicalHref ? <link rel="canonical" href={canonicalHref} /> : null}
+
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content={title} />
+                <meta property="og:description" content={desc} />
+                {site?.company_name ? <meta property="og:site_name" content={site.company_name} /> : null}
+                {canonicalHref ? <meta property="og:url" content={canonicalHref} /> : null}
+                {ogImage ? <meta property="og:image" content={ogImage} /> : null}
+
+                <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+                <meta name="twitter:title" content={title} />
+                <meta name="twitter:description" content={desc} />
+                {site?.seo_twitter_handle ? (
+                    <meta name="twitter:site" content={`@${String(site.seo_twitter_handle).replace(/^@/, '')}`} />
+                ) : null}
+                {ogImage ? <meta name="twitter:image" content={ogImage} /> : null}
+
                 {site?.favicon_url ? (
                     <link rel="icon" href={site.favicon_url} sizes="any" />
                 ) : (

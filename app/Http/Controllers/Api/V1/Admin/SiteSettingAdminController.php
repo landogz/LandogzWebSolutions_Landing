@@ -33,7 +33,14 @@ class SiteSettingAdminController extends Controller
         if ($request->hasFile('favicon')) {
             $data['favicon_path'] = $this->images->storeAndOptimize($request->file('favicon'), 'site', 256);
         }
-        unset($data['logo'], $data['favicon']);
+        $existing = SiteSetting::query()->first();
+        if ($request->hasFile('seo_og_image')) {
+            if ($existing?->seo_og_image_path) {
+                $this->images->delete($existing->seo_og_image_path);
+            }
+            $data['seo_og_image_path'] = $this->images->storeAndOptimize($request->file('seo_og_image'), 'site/og', 1200);
+        }
+        unset($data['logo'], $data['favicon'], $data['seo_og_image']);
 
         if ($request->has('social_links') && is_string($request->input('social_links'))) {
             $decoded = json_decode($request->input('social_links'), true);

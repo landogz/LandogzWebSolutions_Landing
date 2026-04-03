@@ -19,6 +19,10 @@ class SiteSetting extends Model
         'seo_default_title',
         'seo_default_description',
         'seo_default_keywords',
+        'seo_og_image_path',
+        'seo_robots',
+        'seo_twitter_handle',
+        'seo_canonical_base_url',
         'seo_per_page',
     ];
 
