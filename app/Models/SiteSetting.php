@@ -24,6 +24,7 @@ class SiteSetting extends Model
         'seo_twitter_handle',
         'seo_canonical_base_url',
         'seo_per_page',
+        'google_analytics_measurement_id',
     ];
 
     protected function casts(): array

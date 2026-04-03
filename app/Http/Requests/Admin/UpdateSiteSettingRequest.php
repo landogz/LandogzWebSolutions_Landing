@@ -11,6 +11,16 @@ class UpdateSiteSettingRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('google_analytics_measurement_id')) {
+            $v = trim((string) $this->input('google_analytics_measurement_id'));
+            $this->merge([
+                'google_analytics_measurement_id' => $v === '' ? null : $v,
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [
@@ -31,6 +41,7 @@ class UpdateSiteSettingRequest extends FormRequest
             'seo_twitter_handle' => ['nullable', 'string', 'max:64'],
             'seo_canonical_base_url' => ['nullable', 'string', 'max:512'],
             'seo_per_page' => ['nullable'],
+            'google_analytics_measurement_id' => ['nullable', 'string', 'max:32'],
         ];
     }
 }

@@ -66,6 +66,7 @@ export default function AdminSiteSettings() {
         fd.append('seo_robots', form.seo_robots || '');
         fd.append('seo_twitter_handle', (form.seo_twitter_handle || '').replace(/^@/, ''));
         fd.append('seo_canonical_base_url', (form.seo_canonical_base_url || '').trim());
+        fd.append('google_analytics_measurement_id', (form.google_analytics_measurement_id || '').trim());
         fd.append('social_links', JSON.stringify(form.social_links || {}));
         fd.append('seo_per_page', JSON.stringify(perPage));
         const logo = e.target.logo?.files?.[0];
@@ -95,7 +96,7 @@ export default function AdminSiteSettings() {
         <div>
             <AdminPageHeader
                 title="Site settings"
-                description="Brand, contact, SEO (meta, Open Graph, Twitter), and assets for the landing site."
+                description="Brand, contact, SEO, Google Analytics (GA4), and assets for the landing site."
             />
             <form onSubmit={save} className={`${adminPanel} max-w-3xl space-y-4`}>
                 <AdminCrudToolbar onReload={reload} />
@@ -157,6 +158,18 @@ export default function AdminSiteSettings() {
                         value={form.seo_canonical_base_url || ''}
                         onChange={(e) => setForm({ ...form, seo_canonical_base_url: e.target.value })}
                     />
+                </Field>
+                <Field label="Google Analytics — Measurement ID (GA4)">
+                    <input
+                        className={adminInput}
+                        placeholder="G-XXXXXXXXXX"
+                        autoComplete="off"
+                        value={form.google_analytics_measurement_id || ''}
+                        onChange={(e) => setForm({ ...form, google_analytics_measurement_id: e.target.value })}
+                    />
+                    <p className="mt-1 text-xs text-slate-500">
+                        From Google Analytics → Admin → Data streams → your stream → Measurement ID. Leave empty to disable tracking.
+                    </p>
                 </Field>
                 <Field label="Open Graph share image">
                     {form.seo_og_image_url ? (

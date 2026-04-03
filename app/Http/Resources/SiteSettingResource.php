@@ -32,6 +32,7 @@ class SiteSettingResource extends JsonResource
             'seo_twitter_handle' => $this->seo_twitter_handle,
             'seo_canonical_base_url' => $this->seo_canonical_base_url,
             'seo_per_page' => $this->seo_per_page ?? [],
+            'google_analytics_measurement_id' => $this->google_analytics_measurement_id,
         ];
     }
 }
