@@ -140,6 +140,12 @@ export default function LandingPage() {
             <Helmet>
                 <title>{title}</title>
                 <meta name="description" content={site?.seo_default_description || ''} />
+                {site?.favicon_url ? (
+                    <link rel="icon" href={site.favicon_url} sizes="any" />
+                ) : (
+                    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+                )}
+                {site?.logo_url ? <link rel="apple-touch-icon" href={site.logo_url} /> : null}
             </Helmet>
 
             <header className="fixed top-0 inset-x-0 z-50 border-b border-slate-200/80 bg-white/85 pt-safe dark:border-white/10 dark:bg-landogz-navy/85 backdrop-blur-md">

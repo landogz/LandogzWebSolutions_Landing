@@ -1,3 +1,22 @@
+@php
+    $siteForIcons = \App\Models\SiteSetting::query()->first();
+    $faviconHref = $siteForIcons?->favicon_path
+        ? \App\Helpers\MediaHelper::publicUrl($siteForIcons->favicon_path)
+        : asset('favicon.svg');
+    $faviconExt = $siteForIcons?->favicon_path ? strtolower(pathinfo($siteForIcons->favicon_path, PATHINFO_EXTENSION)) : 'svg';
+    $faviconType = match ($faviconExt) {
+        'svg' => 'image/svg+xml',
+        'png' => 'image/png',
+        'ico' => 'image/x-icon',
+        'jpg', 'jpeg' => 'image/jpeg',
+        'webp' => 'image/webp',
+        'gif' => 'image/gif',
+        default => null,
+    };
+    $appleTouchHref = $siteForIcons?->logo_path
+        ? \App\Helpers\MediaHelper::publicUrl($siteForIcons->logo_path)
+        : null;
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -7,6 +26,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Landogz Web Solutions') }}</title>
+    <link rel="icon" href="{{ $faviconHref }}" @if($faviconType) type="{{ $faviconType }}" @endif sizes="any">
+    @if($appleTouchHref)
+        <link rel="apple-touch-icon" href="{{ $appleTouchHref }}">
+    @endif
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
