@@ -89,7 +89,7 @@ export default function AdminClients() {
                 if (logoFile) {
                     unwrap(await api.post(`/admin/clients/${editing.id}`, buildClientFormData(form, logoFile)));
                 } else {
-                    unwrap(await api.put(`/admin/clients/${editing.id}`, buildClientJsonBody(form)));
+                    unwrap(await api.post(`/admin/clients/${editing.id}`, buildClientJsonBody(form)));
                 }
                 toast.success('Client updated');
             } else if (logoFile) {

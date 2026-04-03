@@ -155,7 +155,7 @@ export default function AdminBlog() {
                 if (featuredFile) {
                     unwrap(await api.post(`/admin/blog-posts/${editing.id}`, buildBlogFormData(form, featuredFile)));
                 } else {
-                    unwrap(await api.put(`/admin/blog-posts/${editing.id}`, buildBlogJsonBody(form)));
+                    unwrap(await api.post(`/admin/blog-posts/${editing.id}`, buildBlogJsonBody(form)));
                 }
                 toast.success('Post updated');
             } else if (featuredFile) {

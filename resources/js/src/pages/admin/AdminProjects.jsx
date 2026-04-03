@@ -188,7 +188,7 @@ export default function AdminProjects() {
                         ),
                     );
                 } else {
-                    unwrap(await api.put(`/admin/projects/${editing.id}`, buildProjectJsonBody(form)));
+                    unwrap(await api.post(`/admin/projects/${editing.id}`, buildProjectJsonBody(form)));
                 }
                 toast.success('Project updated');
             } else if (needsMultipart) {

@@ -99,7 +99,7 @@ export default function AdminSkills() {
                 if (iconFile) {
                     unwrap(await api.post(`/admin/skills/${editing.id}`, buildSkillFormData(form, iconFile)));
                 } else {
-                    unwrap(await api.put(`/admin/skills/${editing.id}`, buildSkillJsonBody(form)));
+                    unwrap(await api.post(`/admin/skills/${editing.id}`, buildSkillJsonBody(form)));
                 }
                 toast.success('Skill updated');
             } else if (iconFile) {

@@ -424,7 +424,7 @@ export default function LandingPage() {
                                 whileHover={{ y: -4 }}
                                 className="rounded-2xl border border-slate-200/90 bg-white/90 p-6 text-center shadow-sm dark:border-white/10 dark:bg-slate-900/85"
                             >
-                                <TeamAvatar name={m.name} photoUrl={m.photo_url} size={104} variant={mi} illustrationOnly />
+                                <TeamAvatar name={m.name} photoUrl={m.photo_url} size={104} variant={mi} />
                                 <h3 className="font-display mt-5 text-lg font-semibold">{m.name}</h3>
                                 <p className="text-sm text-sky-700 dark:text-sky-400">{m.position}</p>
                                 <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{m.bio}</p>
