@@ -45,12 +45,14 @@ export default function AdminSiteSettings() {
         e.preventDefault();
         let perPage = {};
         try {
-            perPage = JSON.parse(seoPerPageText || '{}');
+            const raw = (seoPerPageText ?? '').trim();
+            // If user clears the textarea, treat it as "no per-page overrides".
+            perPage = JSON.parse(raw === '' ? '{}' : raw);
             if (Object.prototype.toString.call(perPage) !== '[object Object]') {
                 throw new Error('Must be a JSON object');
             }
         } catch {
-            toast.error('Per-page SEO must be valid JSON (object).');
+            toast.error('Per-page SEO must be valid JSON (object). Example: {} or {"home":{"title":"...","description":"..."}}');
             return;
         }
         const fd = new FormData();
