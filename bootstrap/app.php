@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'super_admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
         ]);
+        $middleware->appendToGroup('web', \App\Http\Middleware\ForceCanonicalUrl::class);
+        $middleware->appendToGroup('api', \App\Http\Middleware\ForceCanonicalUrl::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
