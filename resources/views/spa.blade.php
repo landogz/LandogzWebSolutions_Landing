@@ -16,6 +16,11 @@
     $appleTouchHref = $siteForIcons?->logo_path
         ? \App\Helpers\MediaHelper::publicUrl($siteForIcons->logo_path)
         : null;
+    $canonicalHref = \App\Helpers\SeoHelper::canonicalForRequest(
+        $siteForIcons?->seo_canonical_base_url,
+        config('app.url'),
+        request()
+    );
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -26,6 +31,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Landogz Web Solutions') }}</title>
+    @if($canonicalHref)
+        <link rel="canonical" href="{{ $canonicalHref }}">
+    @endif
+    @if(request()->is('admin', 'admin/*'))
+        <meta name="robots" content="noindex, nofollow">
+    @endif
     <link rel="icon" href="{{ $faviconHref }}" @if($faviconType) type="{{ $faviconType }}" @endif sizes="any">
     @if($appleTouchHref)
         <link rel="apple-touch-icon" href="{{ $appleTouchHref }}">

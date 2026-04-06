@@ -147,7 +147,7 @@ export default function LandingPage() {
                 <meta name="description" content={desc} />
                 {site?.seo_default_keywords ? <meta name="keywords" content={site.seo_default_keywords} /> : null}
                 {site?.seo_robots ? <meta name="robots" content={site.seo_robots} /> : null}
-                {canonicalHref ? <link rel="canonical" href={canonicalHref} /> : null}
+                {/* Canonical is emitted server-side in spa.blade.php to avoid duplicate tags and help crawlers. */}
 
                 <meta property="og:type" content="website" />
                 <meta property="og:title" content={title} />
