@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { api, unwrap } from '@/services/api';
@@ -13,6 +14,7 @@ import ProjectCardPreview from '@/components/landing/ProjectCardPreview';
 import LandingFooter from '@/components/landing/LandingFooter';
 import { groupSkillsByCategory } from '@/utils/groupSkillsByCategory';
 import { getBlogCardVisual } from '@/utils/blogCardVisual';
+import OrganizationJsonLd from '@/components/seo/OrganizationJsonLd';
 
 const statAccents = ['sky', 'violet', 'amber', 'emerald'];
 
@@ -34,9 +36,11 @@ const serviceShell = [
 const navIds = ['about', 'services', 'projects', 'skills', 'team', 'testimonials', 'blog', 'contact'];
 
 export default function LandingPage() {
+    const { slug: blogSlug } = useParams();
     const { dark, toggle } = useTheme();
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState({});
+    const [blogPostBySlug, setBlogPostBySlug] = useState(null);
     const [projectModal, setProjectModal] = useState(null);
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -96,6 +100,47 @@ export default function LandingPage() {
     }, []);
 
     useEffect(() => {
+        setBlogPostBySlug(null);
+    }, [blogSlug]);
+
+    useEffect(() => {
+        if (!blogSlug || loading) {
+            return;
+        }
+        const list = data.blog || [];
+        const found = list.find((p) => p.slug === blogSlug);
+        if (found) {
+            setBlogPostBySlug(found);
+            return;
+        }
+        let cancelled = false;
+        api.get(`/public/blog/${encodeURIComponent(blogSlug)}`)
+            .then((r) => {
+                if (!cancelled) {
+                    setBlogPostBySlug(unwrap(r));
+                }
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setBlogPostBySlug(null);
+                }
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [blogSlug, loading, data.blog]);
+
+    useEffect(() => {
+        if (!blogSlug || loading) {
+            return undefined;
+        }
+        const t = window.setTimeout(() => {
+            document.getElementById('blog')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 450);
+        return () => clearTimeout(t);
+    }, [blogSlug, loading, blogPostBySlug]);
+
+    useEffect(() => {
         if (!mobileNavOpen) {
             return undefined;
         }
@@ -109,6 +154,10 @@ export default function LandingPage() {
     const site = data.site;
     const title = site?.seo_default_title || site?.company_name || 'Landogz Web Solutions';
     const desc = site?.seo_default_description || '';
+    const pageTitle = blogPostBySlug?.title
+        ? `${blogPostBySlug.title} | ${site?.company_name || 'Landogz Web Solutions'}`
+        : title;
+    const pageDesc = (blogPostBySlug?.excerpt || desc) || '';
     const baseUrl = (site?.seo_canonical_base_url || '').replace(/\/$/, '');
     const pathname = typeof window !== 'undefined' ? window.location.pathname || '/' : '/';
     const canonicalHref = baseUrl ? `${baseUrl}${pathname === '/' ? '/' : pathname}` : undefined;
@@ -143,22 +192,22 @@ export default function LandingPage() {
             />
 
             <Helmet>
-                <title>{title}</title>
-                <meta name="description" content={desc} />
-                {site?.seo_default_keywords ? <meta name="keywords" content={site.seo_default_keywords} /> : null}
+                {baseUrl ? <OrganizationJsonLd site={site} canonicalOrigin={baseUrl} /> : null}
+                <title>{pageTitle}</title>
+                <meta name="description" content={pageDesc} />
                 {site?.seo_robots ? <meta name="robots" content={site.seo_robots} /> : null}
                 {/* Canonical is emitted server-side in spa.blade.php to avoid duplicate tags and help crawlers. */}
 
                 <meta property="og:type" content="website" />
-                <meta property="og:title" content={title} />
-                <meta property="og:description" content={desc} />
+                <meta property="og:title" content={pageTitle} />
+                <meta property="og:description" content={pageDesc} />
                 {site?.company_name ? <meta property="og:site_name" content={site.company_name} /> : null}
                 {canonicalHref ? <meta property="og:url" content={canonicalHref} /> : null}
                 {ogImage ? <meta property="og:image" content={ogImage} /> : null}
 
                 <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
-                <meta name="twitter:title" content={title} />
-                <meta name="twitter:description" content={desc} />
+                <meta name="twitter:title" content={pageTitle} />
+                <meta name="twitter:description" content={pageDesc} />
                 {site?.seo_twitter_handle ? (
                     <meta name="twitter:site" content={`@${String(site.seo_twitter_handle).replace(/^@/, '')}`} />
                 ) : null}
@@ -524,6 +573,10 @@ export default function LandingPage() {
                                         key={b.id}
                                         className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-slate-900/85"
                                     >
+                                        <Link
+                                            to={`/blog/${b.slug}`}
+                                            className="flex min-h-0 flex-1 flex-col text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900"
+                                        >
                                         <div
                                             className={`relative aspect-[16/10] overflow-hidden ${b.featured_image_url ? 'bg-slate-200 dark:bg-slate-800' : visual.className}`}
                                         >
@@ -565,6 +618,7 @@ export default function LandingPage() {
                                             <h3 className="font-display mt-2 flex-1 text-lg font-semibold leading-snug">{b.title}</h3>
                                             <p className="mt-2 line-clamp-3 text-sm text-slate-600 dark:text-slate-400">{b.excerpt}</p>
                                         </div>
+                                        </Link>
                                     </article>
                                 );
                             })}

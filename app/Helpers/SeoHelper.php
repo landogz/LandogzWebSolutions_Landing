@@ -2,10 +2,31 @@
 
 namespace App\Helpers;
 
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 
 class SeoHelper
 {
+    /**
+     * Canonical site origin (scheme + host, no trailing slash), HTTPS-upgraded on public hosts.
+     * Prefer Site Settings "Public site URL", else APP_URL.
+     */
+    public static function publicSiteOrigin(): ?string
+    {
+        $site = SiteSetting::query()->first();
+        $raw = trim((string) ($site?->seo_canonical_base_url ?: config('app.url')));
+        if ($raw === '') {
+            return null;
+        }
+
+        $base = rtrim($raw, '/');
+        if (str_starts_with($base, 'http://') && ! str_contains($base, 'localhost') && ! str_contains($base, '127.0.0.1')) {
+            $base = 'https://'.substr($base, strlen('http://'));
+        }
+
+        return $base;
+    }
+
     /**
      * Absolute canonical URL for the current request path.
      * Uses Site Settings "Public site URL" when set, otherwise APP_URL.

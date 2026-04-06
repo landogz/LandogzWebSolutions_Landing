@@ -98,7 +98,7 @@ export default function AdminSiteSettings() {
         <div>
             <AdminPageHeader
                 title="Site settings"
-                description="Brand, contact, SEO, Google Analytics (GA4), and assets for the landing site."
+                description="Brand, contact, SEO, Google Analytics (GA4), and assets. Public site URL powers canonical links, sitemap.xml, and robots.txt."
             />
             <form onSubmit={save} className={`${adminPanel} max-w-3xl space-y-4`}>
                 <AdminCrudToolbar onReload={reload} />

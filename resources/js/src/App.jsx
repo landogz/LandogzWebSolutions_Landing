@@ -24,6 +24,7 @@ import SuperAdminRoute from '@/components/SuperAdminRoute';
 export default function App() {
     return (
         <Routes>
+            <Route path="/blog/:slug" element={<LandingPage />} />
             <Route path="/" element={<LandingPage />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route
