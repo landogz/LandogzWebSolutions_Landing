@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/sitemap.xml', SitemapController::class);
 Route::get('/robots.txt', RobotsController::class);
 
+// Legacy paths (old site / bookmarks) → single-page home for Search Console consolidation.
+Route::permanentRedirect('/our-team', '/');
+Route::permanentRedirect('/our-team/', '/');
+Route::permanentRedirect('/portfolio', '/');
+Route::permanentRedirect('/portfolio/', '/');
+
 Route::view('/', 'spa');
 
 Route::view('/{any}', 'spa')->where('any', '^(?!api(?:/|$)).*');
