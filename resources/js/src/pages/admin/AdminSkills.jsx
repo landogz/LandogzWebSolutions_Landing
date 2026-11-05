@@ -8,6 +8,7 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminDataTable from '@/components/admin/AdminDataTable';
 import AdminPagination from '@/components/admin/AdminPagination';
 import AdminImageField from '@/components/admin/AdminImageField';
+import SkillIcon from '@/components/landing/SkillIcon';
 import {
     adminInput,
     adminLabel,
@@ -146,6 +147,11 @@ export default function AdminSkills() {
                 emptyDescription="Add capabilities to show in the skills section."
                 emptyActionLabel="Add skill"
                 onEmptyAction={openCreate}
+                media={(r) => (
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800/80 ring-1 ring-white/10">
+                        <SkillIcon name={r.name} iconUrl={r.icon_url} className="h-4 w-4" />
+                    </span>
+                )}
                 columns={[
                     {
                         key: 'name',

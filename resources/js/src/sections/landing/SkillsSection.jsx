@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import SectionTitle from '@/components/landing/SectionTitle';
+import SkillIcon from '@/components/landing/SkillIcon';
 import { groupSkillsByCategory } from '@/utils/groupSkillsByCategory';
 import { sectionVariants, staggerContainer, staggerItem } from '@/sections/landing/sectionVariants';
 
@@ -33,13 +34,16 @@ export default function SkillsSection({ skills = [], sectionViewport }) {
                             <h3 className="font-display text-base font-bold uppercase tracking-[0.12em] text-slate-800 dark:text-slate-100 sm:text-lg">
                                 {category}
                             </h3>
-                            <div className="mt-5 flex flex-wrap gap-2">
+                            <div className="mt-5 flex flex-wrap gap-2.5">
                                 {list.map((sk) => (
                                     <span
                                         key={sk.id}
-                                        className="inline-flex items-center gap-2 rounded-full border border-sky-500/25 bg-gradient-to-r from-sky-500/10 to-violet-500/5 px-4 py-2 text-sm font-medium text-slate-800 shadow-sm dark:border-sky-400/20 dark:from-sky-500/15 dark:to-violet-500/10 dark:text-slate-100"
+                                        className="inline-flex items-center gap-2.5 rounded-full border border-sky-500/25 bg-gradient-to-r from-sky-500/10 to-violet-500/5 px-3.5 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:border-sky-500/40 hover:shadow-md dark:border-sky-400/20 dark:from-sky-500/15 dark:to-violet-500/10 dark:text-slate-100 dark:hover:border-sky-400/35"
                                     >
-                                        {sk.name}
+                                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/80 ring-1 ring-sky-500/15 dark:bg-slate-900/80 dark:ring-sky-400/20">
+                                            <SkillIcon name={sk.name} iconUrl={sk.icon_url} className="h-4 w-4" />
+                                        </span>
+                                        <span>{sk.name}</span>
                                         <span className="rounded-md bg-white/70 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                                             {sk.proficiency}%
                                         </span>
