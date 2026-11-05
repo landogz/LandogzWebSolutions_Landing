@@ -54,8 +54,12 @@ export default function AdminSkills() {
     const [form, setForm] = useState(empty);
     const [iconFile, setIconFile] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
 
     function load() {
+        setLoading(true);
+        setLoadError(false);
         api
             .get('/admin/skills', { params: { page, per_page: 20 } })
             .then((r) => {
@@ -63,7 +67,11 @@ export default function AdminSkills() {
                 setRows(d.items || []);
                 setMeta(d.pagination || {});
             })
-            .catch(() => toast.error('Failed to load'));
+            .catch(() => {
+                setLoadError(true);
+                toast.error('Failed to load');
+            })
+            .finally(() => setLoading(false));
     }
 
     useEffect(() => {

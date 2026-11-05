@@ -38,8 +38,12 @@ export default function AdminUsers() {
     const [form, setForm] = useState(empty);
     const [editForm, setEditForm] = useState(emptyEdit);
     const [deleteId, setDeleteId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
 
     function load() {
+        setLoading(true);
+        setLoadError(false);
         api
             .get('/admin/users', { params: { page, search, per_page: 15 } })
             .then((r) => {
@@ -47,7 +51,11 @@ export default function AdminUsers() {
                 setRows(d.items || []);
                 setMeta(d.pagination || {});
             })
-            .catch((e) => toastApiError(e, 'Failed to load users'));
+            .catch((e) => {
+                setLoadError(true);
+                toastApiError(e, 'Failed to load users');
+            })
+            .finally(() => setLoading(false));
     }
 
     useEffect(() => {

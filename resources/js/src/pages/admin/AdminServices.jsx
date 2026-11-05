@@ -27,12 +27,20 @@ export default function AdminServices() {
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState(empty);
     const [deleteId, setDeleteId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
 
     function load() {
+        setLoading(true);
+        setLoadError(false);
         api
             .get('/admin/services')
             .then((r) => setRows(unwrap(r) || []))
-            .catch(() => toast.error('Failed to load'));
+            .catch(() => {
+                setLoadError(true);
+                toast.error('Failed to load');
+            })
+            .finally(() => setLoading(false));
     }
 
     useEffect(() => {

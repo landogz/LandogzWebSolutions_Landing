@@ -20,8 +20,12 @@ export default function AdminMessages() {
     const [page, setPage] = useState(1);
     const [view, setView] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
 
     function load() {
+        setLoading(true);
+        setLoadError(false);
         api
             .get('/admin/contact-messages', { params: { page, per_page: 15 } })
             .then((r) => {
@@ -29,7 +33,11 @@ export default function AdminMessages() {
                 setRows(d.items || []);
                 setMeta(d.pagination || {});
             })
-            .catch(() => toast.error('Failed to load'));
+            .catch(() => {
+                setLoadError(true);
+                toast.error('Failed to load');
+            })
+            .finally(() => setLoading(false));
     }
 
     useEffect(() => {
