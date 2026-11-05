@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import HeroVisual from '@/components/landing/HeroVisual';
 import { splitHeadlineToTwoLines } from '@/utils/splitHeadlineToTwoLines';
+import { prefersReducedMotion } from '@/sections/landing/sectionVariants';
 
 /** Inline pattern — avoid Tailwind `bg-[url('data:…')]` (nested quotes break @vitejs/plugin-react preamble). */
 const HERO_GRID_BG =
@@ -14,11 +15,15 @@ export default function HeroSection({ hero }) {
     const [word, setWord] = useState(0);
     const words = hero?.animated_words?.length ? hero.animated_words : ['Build', 'Ship', 'Scale'];
     const headlineLines = splitHeadlineToTwoLines(hero?.headline);
+    const reduceMotion = prefersReducedMotion();
 
     useEffect(() => {
+        if (reduceMotion || words.length < 2) {
+            return undefined;
+        }
         const t = setInterval(() => setWord((w) => (w + 1) % words.length), 2200);
         return () => clearInterval(t);
-    }, [words.length]);
+    }, [words.length, reduceMotion]);
 
     return (
         <section className="relative flex min-h-[min(92dvh,680px)] items-center overflow-x-hidden overflow-y-visible px-4 pb-20 pt-[calc(6rem+env(safe-area-inset-top,0px))] sm:min-h-[66vh] sm:pb-24 sm:pt-24 lg:min-h-[70vh] lg:pb-28">
@@ -110,8 +115,8 @@ export default function HeroSection({ hero }) {
                 href="#about"
                 className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))] left-1/2 z-10 flex min-h-[48px] min-w-[48px] -translate-x-1/2 flex-col items-center justify-center gap-1.5 text-sky-700 drop-shadow-sm transition active:opacity-80 dark:text-sky-200"
                 aria-label="Scroll to About"
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                animate={reduceMotion ? undefined : { y: [0, 10, 0] }}
+                transition={reduceMotion ? undefined : { duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
                 <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-sky-800 dark:text-sky-100">Scroll</span>
                 <motion.svg
@@ -121,8 +126,8 @@ export default function HeroSection({ hero }) {
                     stroke="currentColor"
                     strokeWidth={2.25}
                     aria-hidden
-                    animate={{ opacity: [0.55, 1, 0.55], scale: [1, 1.06, 1] }}
-                    transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                    animate={reduceMotion ? undefined : { opacity: [0.55, 1, 0.55], scale: [1, 1.06, 1] }}
+                    transition={reduceMotion ? undefined : { duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </motion.svg>

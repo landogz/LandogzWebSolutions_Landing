@@ -5,12 +5,14 @@ import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminLoadingState from '@/components/admin/AdminLoadingState';
+import AdminEmptyState from '@/components/admin/AdminEmptyState';
+import AdminImageField from '@/components/admin/AdminImageField';
 import {
     adminInput,
     adminLabel,
     adminPrimaryBtn,
     adminSecondaryBtn,
-    adminFileInput,
     adminListRow,
     adminTextLink,
     adminTextLinkDanger,
@@ -45,12 +47,22 @@ export default function AdminClients() {
     const [form, setForm] = useState(empty);
     const [logoFile, setLogoFile] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     function load() {
+        setLoading(true);
+        setLoadError(false);
         api
             .get('/admin/clients')
             .then((r) => setRows(unwrap(r) || []))
-            .catch(() => toast.error('Failed to load'));
+            .catch(() => {
+                setLoadError(true);
+                toast.error('Failed to load');
+            })
+            .finally(() => setLoading(false));
     }
 
     useEffect(() => {
@@ -84,6 +96,8 @@ export default function AdminClients() {
 
     async function save(e) {
         e.preventDefault();
+        if (saving) return;
+        setSaving(true);
         try {
             if (editing) {
                 if (logoFile) {
@@ -103,10 +117,14 @@ export default function AdminClients() {
             load();
         } catch (err) {
             toastApiError(err, 'Save failed');
+        } finally {
+            setSaving(false);
         }
     }
 
     async function remove(id) {
+        if (deleting) return;
+        setDeleting(true);
         try {
             unwrap(await api.delete(`/admin/clients/${id}`));
             toast.success('Deleted');
@@ -114,6 +132,8 @@ export default function AdminClients() {
             load();
         } catch (err) {
             toastApiError(err, 'Delete failed');
+        } finally {
+            setDeleting(false);
         }
     }
 
@@ -122,11 +142,24 @@ export default function AdminClients() {
             <AdminPageHeader title="Clients / partners" description="Logo strip and partner names for social proof on the landing page." />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} />
 
-            <ul className="mt-6 space-y-3">
-                {rows.length === 0 ? (
-                    <li className="rounded-xl border border-dashed border-white/10 py-12 text-center text-sm text-slate-500">No clients yet.</li>
-                ) : (
-                    rows.map((c) => (
+            {loading ? (
+                <AdminLoadingState />
+            ) : loadError ? (
+                <div className="mt-6">
+                    <AdminEmptyState error onRetry={load} />
+                </div>
+            ) : rows.length === 0 ? (
+                <div className="mt-6">
+                    <AdminEmptyState
+                        title="No clients yet"
+                        description="Add partner logos and names for social proof."
+                        actionLabel="Add client"
+                        onAction={openCreate}
+                    />
+                </div>
+            ) : (
+                <ul className="mt-6 space-y-3">
+                    {rows.map((c) => (
                         <li key={c.id} className={adminListRow}>
                             <span className="font-medium text-slate-200">{c.company_name}</span>
                             <div className="flex gap-1">
@@ -138,12 +171,12 @@ export default function AdminClients() {
                                 </button>
                             </div>
                         </li>
-                    ))
-                )}
-            </ul>
+                    ))}
+                </ul>
+            )}
 
             {modal ? (
-                <AdminModal title={editing ? 'Edit client' : 'Add client'} onClose={() => setModal(false)}>
+                <AdminModal title={editing ? 'Edit client' : 'Add client'} onClose={() => !saving && setModal(false)}>
                     <form onSubmit={save} className="space-y-4">
                         <label className="block">
                             <span className={adminLabel}>Company name</span>
@@ -163,15 +196,12 @@ export default function AdminClients() {
                                 onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) || 0 })}
                             />
                         </label>
-                        <label className="block">
-                            <span className={adminLabel}>Logo</span>
-                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
-                        </label>
+                        <AdminImageField label="Logo" currentUrl={editing?.logo_url} file={logoFile} onFileChange={setLogoFile} />
                         <div className="flex flex-wrap gap-3 pt-2">
-                            <button type="submit" className={adminPrimaryBtn}>
-                                Save
+                            <button type="submit" className={adminPrimaryBtn} disabled={saving} aria-busy={saving}>
+                                {saving ? 'Saving…' : 'Save'}
                             </button>
-                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)} disabled={saving}>
                                 Cancel
                             </button>
                         </div>
@@ -180,7 +210,13 @@ export default function AdminClients() {
             ) : null}
 
             {deleteId ? (
-                <AdminConfirmDialog title="Delete client?" onConfirm={() => remove(deleteId)} onCancel={() => setDeleteId(null)} danger />
+                <AdminConfirmDialog
+                    title="Delete client?"
+                    onConfirm={() => remove(deleteId)}
+                    onCancel={() => !deleting && setDeleteId(null)}
+                    busy={deleting}
+                    danger
+                />
             ) : null}
         </div>
     );

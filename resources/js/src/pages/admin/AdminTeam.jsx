@@ -5,18 +5,15 @@ import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminDataTable from '@/components/admin/AdminDataTable';
+import AdminPagination from '@/components/admin/AdminPagination';
+import AdminImageField from '@/components/admin/AdminImageField';
 import {
     adminInput,
     adminLabel,
     adminPrimaryBtn,
     adminSecondaryBtn,
     adminTextarea,
-    adminFileInput,
-    adminTableShell,
-    adminTableHead,
-    adminTh,
-    adminTd,
-    adminPaginationBtn,
     adminTextLink,
     adminTextLinkDanger,
 } from '@/components/admin/adminTheme';
@@ -52,7 +49,6 @@ function buildTeamFormData(form, photoFile) {
     return fd;
 }
 
-/** JSON body for create/update when no new photo — avoids empty multipart bodies on some PHP hosts. */
 function buildTeamJsonBody(form) {
     return {
         name: form.name,
@@ -76,8 +72,14 @@ export default function AdminTeam() {
     const [form, setForm] = useState(empty);
     const [photoFile, setPhotoFile] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     function load() {
+        setLoading(true);
+        setLoadError(false);
         api
             .get('/admin/team-members', { params: { page, per_page: 15 } })
             .then((r) => {
@@ -85,7 +87,11 @@ export default function AdminTeam() {
                 setRows(d.items || []);
                 setMeta(d.pagination || {});
             })
-            .catch(() => toast.error('Failed to load'));
+            .catch(() => {
+                setLoadError(true);
+                toast.error('Failed to load');
+            })
+            .finally(() => setLoading(false));
     }
 
     useEffect(() => {
@@ -124,6 +130,8 @@ export default function AdminTeam() {
 
     async function save(e) {
         e.preventDefault();
+        if (saving) return;
+        setSaving(true);
         try {
             if (editing) {
                 if (photoFile) {
@@ -143,10 +151,14 @@ export default function AdminTeam() {
             load();
         } catch (err) {
             toastApiError(err, 'Save failed');
+        } finally {
+            setSaving(false);
         }
     }
 
     async function remove(id) {
+        if (deleting) return;
+        setDeleting(true);
         try {
             unwrap(await api.delete(`/admin/team-members/${id}`));
             toast.success('Deleted');
@@ -154,6 +166,8 @@ export default function AdminTeam() {
             load();
         } catch (err) {
             toastApiError(err, 'Delete failed');
+        } finally {
+            setDeleting(false);
         }
     }
 
@@ -162,61 +176,51 @@ export default function AdminTeam() {
             <AdminPageHeader title="Team" description="People cards on the landing page — photo, role, bio, and social links." />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} createLabel="Add member" />
 
-            <div className={`${adminTableShell} mt-6`}>
-                <table className="min-w-full text-sm">
-                    <thead className={adminTableHead}>
-                        <tr>
-                            <th className={adminTh}>Name</th>
-                            <th className={adminTh}>Role</th>
-                            <th className={`${adminTh} text-right`}>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={3} className={`${adminTd} py-12 text-center text-slate-500`}>
-                                    No team members yet.
-                                </td>
-                            </tr>
-                        ) : (
-                            rows.map((m) => (
-                                <tr key={m.id} className="transition hover:bg-white/[0.02]">
-                                    <td className={`${adminTd} font-medium text-slate-200`}>{m.name}</td>
-                                    <td className={adminTd}>{m.position || '—'}</td>
-                                    <td className={`${adminTd} text-right`}>
-                                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(m)}>
-                                            Edit
-                                        </button>
-                                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(m.id)}>
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button type="button" disabled={page <= 1} className={adminPaginationBtn} onClick={() => setPage((p) => p - 1)}>
-                    Prev
-                </button>
-                <span className="text-sm text-slate-500">
-                    <span className="tabular-nums text-slate-300">{meta.current_page || page}</span> /{' '}
-                    <span className="tabular-nums">{meta.last_page || 1}</span>
-                </span>
-                <button
-                    type="button"
-                    disabled={(meta.current_page || page) >= (meta.last_page || 1)}
-                    className={adminPaginationBtn}
-                    onClick={() => setPage((p) => p + 1)}
-                >
-                    Next
-                </button>
-            </div>
+            <AdminDataTable
+                loading={loading}
+                error={loadError}
+                onRetry={load}
+                rows={rows}
+                emptyTitle="No team members yet"
+                emptyDescription="Add the people who appear in Team Composition."
+                emptyActionLabel="Add member"
+                onEmptyAction={openCreate}
+                media={(m) =>
+                    m.photo_url ? (
+                        <img src={m.photo_url} alt="" className="h-10 w-10 rounded-full object-cover ring-1 ring-white/10" />
+                    ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/15 text-xs font-bold text-sky-300 ring-1 ring-sky-500/20">
+                            {(m.name || '?').slice(0, 1)}
+                        </div>
+                    )
+                }
+                columns={[
+                    {
+                        key: 'name',
+                        label: 'Name',
+                        render: (m) => <span className="font-medium text-slate-200">{m.name}</span>,
+                    },
+                    {
+                        key: 'position',
+                        label: 'Role',
+                        render: (m) => m.position || '—',
+                    },
+                ]}
+                actions={(m) => (
+                    <>
+                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(m)}>
+                            Edit
+                        </button>
+                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(m.id)}>
+                            Delete
+                        </button>
+                    </>
+                )}
+            />
+            <AdminPagination meta={meta} page={page} onPageChange={setPage} />
 
             {modal ? (
-                <AdminModal title={editing ? 'Edit team member' : 'Add team member'} onClose={() => setModal(false)} wide>
+                <AdminModal title={editing ? 'Edit team member' : 'Add team member'} onClose={() => !saving && setModal(false)} wide>
                     <form onSubmit={save} className="space-y-4">
                         <label className="block">
                             <span className={adminLabel}>Name</span>
@@ -254,15 +258,12 @@ export default function AdminTeam() {
                                 onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) || 0 })}
                             />
                         </label>
-                        <label className="block">
-                            <span className={adminLabel}>Photo</span>
-                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
-                        </label>
+                        <AdminImageField label="Photo" currentUrl={editing?.photo_url} file={photoFile} onFileChange={setPhotoFile} />
                         <div className="flex flex-wrap gap-3 pt-2">
-                            <button type="submit" className={adminPrimaryBtn}>
-                                Save
+                            <button type="submit" className={adminPrimaryBtn} disabled={saving} aria-busy={saving}>
+                                {saving ? 'Saving…' : 'Save'}
                             </button>
-                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)} disabled={saving}>
                                 Cancel
                             </button>
                         </div>
@@ -271,7 +272,13 @@ export default function AdminTeam() {
             ) : null}
 
             {deleteId ? (
-                <AdminConfirmDialog title="Delete team member?" onConfirm={() => remove(deleteId)} onCancel={() => setDeleteId(null)} danger />
+                <AdminConfirmDialog
+                    title="Delete team member?"
+                    onConfirm={() => remove(deleteId)}
+                    onCancel={() => !deleting && setDeleteId(null)}
+                    busy={deleting}
+                    danger
+                />
             ) : null}
         </div>
     );

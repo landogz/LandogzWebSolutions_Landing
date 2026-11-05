@@ -83,8 +83,11 @@ export default function LandingFooter({ site, tagline }) {
                             ) : null}
                             {site?.phone ? <li className="text-slate-700 dark:text-slate-300">{site.phone}</li> : null}
                             <li>
-                                <a href="/admin/login" className="text-sky-600 hover:underline dark:text-sky-400">
-                                    Client admin
+                                <a
+                                    href="/admin/login"
+                                    className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
+                                >
+                                    Admin
                                 </a>
                             </li>
                         </ul>

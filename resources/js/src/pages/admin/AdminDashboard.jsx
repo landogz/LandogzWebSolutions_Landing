@@ -88,10 +88,16 @@ export default function AdminDashboard() {
                             (data.recent_messages || []).map((m) => (
                                 <tr key={m.id} className="transition hover:bg-white/[0.02]">
                                     <td className={adminTd}>
-                                        <span className="font-medium text-slate-200">{m.name}</span>
+                                        <Link to="/admin/messages" className="font-medium text-slate-200 hover:text-sky-300">
+                                            {m.name}
+                                        </Link>
                                         <span className="mt-0.5 block text-xs text-slate-500">{m.email}</span>
                                     </td>
-                                    <td className={adminTd}>{m.subject || '—'}</td>
+                                    <td className={adminTd}>
+                                        <Link to="/admin/messages" className="hover:text-sky-300">
+                                            {m.subject || '—'}
+                                        </Link>
+                                    </td>
                                     <td className={adminTd}>
                                         <span className={adminBadge}>{m.status}</span>
                                     </td>

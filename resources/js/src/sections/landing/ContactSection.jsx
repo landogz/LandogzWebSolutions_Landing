@@ -184,38 +184,65 @@ export default function ContactSection({ site }) {
                             className="space-y-4 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/[0.06] dark:border-white/10 dark:bg-slate-950 dark:shadow-black/40 dark:ring-white/10 sm:p-8"
                         >
                             <p className="text-base font-semibold text-slate-900 dark:text-white">Send a message</p>
-                            <input
-                                required
-                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 sm:text-sm"
-                                placeholder="Name"
-                                value={form.name}
-                                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            />
-                            <input
-                                required
-                                type="email"
-                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 sm:text-sm"
-                                placeholder="Email"
-                                value={form.email}
-                                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                            />
-                            <input
-                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 sm:text-sm"
-                                placeholder="Subject"
-                                value={form.subject}
-                                onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                            />
-                            <textarea
-                                required
-                                rows={5}
-                                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 sm:text-sm"
-                                placeholder="Tell us about your project…"
-                                value={form.message}
-                                onChange={(e) => setForm({ ...form, message: e.target.value })}
-                            />
+                            <div>
+                                <label htmlFor="contact-name" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                                    Name
+                                </label>
+                                <input
+                                    id="contact-name"
+                                    required
+                                    name="name"
+                                    autoComplete="name"
+                                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 sm:text-sm"
+                                    value={form.name}
+                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="contact-email" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                                    Email
+                                </label>
+                                <input
+                                    id="contact-email"
+                                    required
+                                    type="email"
+                                    name="email"
+                                    autoComplete="email"
+                                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 sm:text-sm"
+                                    value={form.email}
+                                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="contact-subject" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                                    Subject
+                                </label>
+                                <input
+                                    id="contact-subject"
+                                    name="subject"
+                                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 sm:text-sm"
+                                    value={form.subject}
+                                    onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="contact-message" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                                    Message
+                                </label>
+                                <textarea
+                                    id="contact-message"
+                                    required
+                                    name="message"
+                                    rows={5}
+                                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 sm:text-sm"
+                                    value={form.message}
+                                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                                />
+                            </div>
                             <button
                                 type="submit"
                                 disabled={sending}
+                                aria-busy={sending}
                                 className="w-full rounded-xl bg-gradient-to-r from-landogz-blue to-sky-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:from-blue-600 hover:to-sky-500 disabled:opacity-60"
                             >
                                 {sending ? 'Sending…' : 'Send message'}

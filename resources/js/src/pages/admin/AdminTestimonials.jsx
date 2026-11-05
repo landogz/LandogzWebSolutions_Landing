@@ -5,6 +5,9 @@ import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminLoadingState from '@/components/admin/AdminLoadingState';
+import AdminEmptyState from '@/components/admin/AdminEmptyState';
+import AdminImageField from '@/components/admin/AdminImageField';
 import {
     adminInput,
     adminLabel,
@@ -12,7 +15,6 @@ import {
     adminSecondaryBtn,
     adminSelect,
     adminTextarea,
-    adminFileInput,
     adminTestimonialCard,
     adminTextLink,
     adminTextLinkDanger,
@@ -60,12 +62,22 @@ export default function AdminTestimonials() {
     const [form, setForm] = useState(empty);
     const [photoFile, setPhotoFile] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     function load() {
+        setLoading(true);
+        setLoadError(false);
         api
             .get('/admin/testimonials')
             .then((r) => setRows(unwrap(r) || []))
-            .catch(() => toast.error('Failed to load'));
+            .catch(() => {
+                setLoadError(true);
+                toast.error('Failed to load');
+            })
+            .finally(() => setLoading(false));
     }
 
     useEffect(() => {
@@ -102,6 +114,8 @@ export default function AdminTestimonials() {
 
     async function save(e) {
         e.preventDefault();
+        if (saving) return;
+        setSaving(true);
         try {
             if (editing) {
                 if (photoFile) {
@@ -121,10 +135,14 @@ export default function AdminTestimonials() {
             load();
         } catch (err) {
             toastApiError(err, 'Save failed');
+        } finally {
+            setSaving(false);
         }
     }
 
     async function remove(id) {
+        if (deleting) return;
+        setDeleting(true);
         try {
             unwrap(await api.delete(`/admin/testimonials/${id}`));
             toast.success('Deleted');
@@ -132,6 +150,8 @@ export default function AdminTestimonials() {
             load();
         } catch (err) {
             toastApiError(err, 'Delete failed');
+        } finally {
+            setDeleting(false);
         }
     }
 
@@ -140,11 +160,24 @@ export default function AdminTestimonials() {
             <AdminPageHeader title="Testimonials" description="Social proof quotes — rating, optional photo, and publish state." />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} />
 
-            <ul className="mt-6 space-y-4">
-                {rows.length === 0 ? (
-                    <li className="rounded-xl border border-dashed border-white/10 py-12 text-center text-sm text-slate-500">No testimonials yet.</li>
-                ) : (
-                    rows.map((t) => (
+            {loading ? (
+                <AdminLoadingState />
+            ) : loadError ? (
+                <div className="mt-6">
+                    <AdminEmptyState error onRetry={load} />
+                </div>
+            ) : rows.length === 0 ? (
+                <div className="mt-6">
+                    <AdminEmptyState
+                        title="No testimonials yet"
+                        description="Add client quotes to build trust on the landing page."
+                        actionLabel="Add testimonial"
+                        onAction={openCreate}
+                    />
+                </div>
+            ) : (
+                <ul className="mt-6 space-y-4">
+                    {rows.map((t) => (
                         <li key={t.id} className={adminTestimonialCard}>
                             <div className="flex flex-wrap items-start justify-between gap-4">
                                 <div className="min-w-0 flex-1">
@@ -162,12 +195,12 @@ export default function AdminTestimonials() {
                                 </div>
                             </div>
                         </li>
-                    ))
-                )}
-            </ul>
+                    ))}
+                </ul>
+            )}
 
             {modal ? (
-                <AdminModal title={editing ? 'Edit testimonial' : 'Create testimonial'} onClose={() => setModal(false)} wide>
+                <AdminModal title={editing ? 'Edit testimonial' : 'Create testimonial'} onClose={() => !saving && setModal(false)} wide>
                     <form onSubmit={save} className="space-y-4">
                         <label className="block">
                             <span className={adminLabel}>Client name</span>
@@ -211,15 +244,12 @@ export default function AdminTestimonials() {
                                 onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) || 0 })}
                             />
                         </label>
-                        <label className="block">
-                            <span className={adminLabel}>Photo</span>
-                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
-                        </label>
+                        <AdminImageField label="Photo" currentUrl={editing?.photo_url} file={photoFile} onFileChange={setPhotoFile} />
                         <div className="flex flex-wrap gap-3 pt-2">
-                            <button type="submit" className={adminPrimaryBtn}>
-                                Save
+                            <button type="submit" className={adminPrimaryBtn} disabled={saving} aria-busy={saving}>
+                                {saving ? 'Saving…' : 'Save'}
                             </button>
-                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)} disabled={saving}>
                                 Cancel
                             </button>
                         </div>
@@ -228,7 +258,13 @@ export default function AdminTestimonials() {
             ) : null}
 
             {deleteId ? (
-                <AdminConfirmDialog title="Delete testimonial?" onConfirm={() => remove(deleteId)} onCancel={() => setDeleteId(null)} danger />
+                <AdminConfirmDialog
+                    title="Delete testimonial?"
+                    onConfirm={() => remove(deleteId)}
+                    onCancel={() => !deleting && setDeleteId(null)}
+                    busy={deleting}
+                    danger
+                />
             ) : null}
         </div>
     );

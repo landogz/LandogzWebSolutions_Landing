@@ -77,73 +77,49 @@ export default function AdminMessages() {
             />
             <AdminCrudToolbar onReload={load} />
 
-            <div className={`${adminTableShell} mt-6`}>
-                <table className="min-w-full text-sm">
-                    <thead className={adminTableHead}>
-                        <tr>
-                            <th className={adminTh}>From</th>
-                            <th className={adminTh}>Subject</th>
-                            <th className={adminTh}>Status</th>
-                            <th className={adminTh}>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} className={`${adminTd} py-12 text-center text-slate-500`}>
-                                    No messages yet.
-                                </td>
-                            </tr>
-                        ) : (
-                            rows.map((m) => (
-                                <tr key={m.id} className="transition hover:bg-white/[0.02]">
-                                    <td className={adminTd}>
-                                        <span className="font-medium text-slate-200">{m.name}</span>
-                                        <span className="mt-0.5 block text-xs text-slate-500">{m.email}</span>
-                                    </td>
-                                    <td className={adminTd}>{m.subject || '—'}</td>
-                                    <td className={adminTd}>
-                                        <span className={adminBadge}>{m.status}</span>
-                                    </td>
-                                    <td className={adminTd}>
-                                        <div className="flex flex-wrap gap-1">
-                                            <button type="button" className={adminTextLink} onClick={() => openView(m)}>
-                                                View
-                                            </button>
-                                            <button type="button" className={adminTextLink} onClick={() => setStatus(m.id, 'read')}>
-                                                Read
-                                            </button>
-                                            <button type="button" className={adminTextLink} onClick={() => setStatus(m.id, 'archived')}>
-                                                Archive
-                                            </button>
-                                            <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(m.id)}>
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button type="button" disabled={page <= 1} className={adminPaginationBtn} onClick={() => setPage((p) => p - 1)}>
-                    Prev
-                </button>
-                <span className="text-sm text-slate-500">
-                    <span className="tabular-nums text-slate-300">{meta.current_page || page}</span> /{' '}
-                    <span className="tabular-nums">{meta.last_page || 1}</span>
-                </span>
-                <button
-                    type="button"
-                    disabled={(meta.current_page || page) >= (meta.last_page || 1)}
-                    className={adminPaginationBtn}
-                    onClick={() => setPage((p) => p + 1)}
-                >
-                    Next
-                </button>
-            </div>
+            <AdminDataTable
+                loading={loading}
+                error={loadError}
+                onRetry={load}
+                rows={rows}
+                emptyTitle="No messages yet"
+                emptyDescription="Contact form submissions will appear here."
+                columns={[
+                    {
+                        key: 'from',
+                        label: 'From',
+                        render: (m) => (
+                            <>
+                                <span className="font-medium text-slate-200">{m.name}</span>
+                                <span className="mt-0.5 block text-xs text-slate-500">{m.email}</span>
+                            </>
+                        ),
+                    },
+                    { key: 'subject', label: 'Subject', render: (m) => m.subject || '—' },
+                    {
+                        key: 'status',
+                        label: 'Status',
+                        render: (m) => <span className={adminBadge}>{m.status}</span>,
+                    },
+                ]}
+                actions={(m) => (
+                    <div className="flex flex-wrap justify-end gap-1">
+                        <button type="button" className={adminTextLink} onClick={() => openView(m)}>
+                            View
+                        </button>
+                        <button type="button" className={adminTextLink} onClick={() => setStatus(m.id, 'read')}>
+                            Read
+                        </button>
+                        <button type="button" className={adminTextLink} onClick={() => setStatus(m.id, 'archived')}>
+                            Archive
+                        </button>
+                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(m.id)}>
+                            Delete
+                        </button>
+                    </div>
+                )}
+            />
+            <AdminPagination meta={meta} page={page} onPageChange={setPage} />
 
             {view ? (
                 <AdminModal title="Message" onClose={() => setView(null)} wide>

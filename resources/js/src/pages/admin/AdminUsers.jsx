@@ -134,67 +134,51 @@ export default function AdminUsers() {
                 onChange={(e) => setSearch(e.target.value)}
             />
 
-            <div className={`${adminTableShell} mt-6`}>
-                <table className="min-w-full text-sm">
-                    <thead className={adminTableHead}>
-                        <tr>
-                            <th className={adminTh}>Name</th>
-                            <th className={adminTh}>Email</th>
-                            <th className={adminTh}>Role</th>
-                            <th className={adminTh}>Added</th>
-                            <th className={`${adminTh} text-right`}>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className={`${adminTd} py-12 text-center text-slate-500`}>
-                                    No users found.
-                                </td>
-                            </tr>
-                        ) : (
-                            rows.map((u) => (
-                                <tr key={u.id} className="transition hover:bg-white/[0.02]">
-                                    <td className={`${adminTd} font-medium text-slate-200`}>{u.name}</td>
-                                    <td className={adminTd}>{u.email}</td>
-                                    <td className={adminTd}>
-                                        <span className={`inline-flex rounded-lg border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${roleBadgeClass(u.role)}`}>
-                                            {u.role === 'super_admin' ? 'Super admin' : 'Editor'}
-                                        </span>
-                                    </td>
-                                    <td className={`${adminTd} text-xs text-slate-500`}>{u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
-                                    <td className={`${adminTd} text-right`}>
-                                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(u)}>
-                                            Edit
-                                        </button>
-                                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(u.id)}>
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button type="button" disabled={page <= 1} className={adminPaginationBtn} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-                    Prev
-                </button>
-                <span className="text-sm text-slate-500">
-                    <span className="tabular-nums text-slate-300">{meta.current_page || page}</span> /{' '}
-                    <span className="tabular-nums">{meta.last_page || 1}</span>
-                </span>
-                <button
-                    type="button"
-                    disabled={(meta.current_page || page) >= (meta.last_page || 1)}
-                    className={adminPaginationBtn}
-                    onClick={() => setPage((p) => p + 1)}
-                >
-                    Next
-                </button>
-            </div>
+            <AdminDataTable
+                loading={loading}
+                error={loadError}
+                onRetry={load}
+                rows={rows}
+                filtered={Boolean(search)}
+                emptyTitle="No users found"
+                emptyDescription="Add an administrator account to get started."
+                emptyActionLabel="Add user"
+                onEmptyAction={openCreate}
+                columns={[
+                    {
+                        key: 'name',
+                        label: 'Name',
+                        render: (u) => <span className="font-medium text-slate-200">{u.name}</span>,
+                    },
+                    { key: 'email', label: 'Email' },
+                    {
+                        key: 'role',
+                        label: 'Role',
+                        render: (u) => (
+                            <span className={`inline-flex rounded-lg border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${roleBadgeClass(u.role)}`}>
+                                {u.role === 'super_admin' ? 'Super admin' : 'Editor'}
+                            </span>
+                        ),
+                    },
+                    {
+                        key: 'created_at',
+                        label: 'Added',
+                        className: 'text-xs text-slate-500',
+                        render: (u) => (u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'),
+                    },
+                ]}
+                actions={(u) => (
+                    <>
+                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(u)}>
+                            Edit
+                        </button>
+                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(u.id)}>
+                            Delete
+                        </button>
+                    </>
+                )}
+            />
+            <AdminPagination meta={meta} page={page} onPageChange={setPage} />
 
             {modal ? (
                 <AdminModal title={editing ? 'Edit user' : 'Create user'} onClose={() => setModal(false)} wide>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { prefersReducedMotion } from '@/sections/landing/sectionVariants';
 
 function parseStat(raw) {
     const s = String(raw ?? '').trim();
@@ -25,6 +26,10 @@ export default function StatCounter({ value: raw, label, accent = 'sky' }) {
 
     useEffect(() => {
         if (display !== undefined || value == null || !inView) return;
+        if (prefersReducedMotion()) {
+            setN(value);
+            return;
+        }
         const duration = 1400;
         const start = performance.now();
         const to = value;

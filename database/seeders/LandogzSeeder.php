@@ -180,6 +180,66 @@ class LandogzSeeder extends Seeder
             'status' => 'published',
         ]);
 
+        Project::query()->create([
+            'project_category_id' => $catGov->id,
+            'title' => 'PADS Portal under the Dangerous Drugs Board (DDB)',
+            'slug' => 'pads-portal-ddb',
+            'short_description' => 'Portal system for PADS under the Dangerous Drugs Board.',
+            'full_description' => 'Built and maintained the PADS Portal for the Dangerous Drugs Board (DDB) — secure access, structured workflows, and reporting for board-related prevention and program operations.',
+            'tech_stack' => ['Laravel', 'MySQL', 'JavaScript', 'Tailwind CSS'],
+            'client_name' => 'Dangerous Drugs Board (DDB)',
+            'project_url' => null,
+            'github_url' => null,
+            'duration' => 'Ongoing / phased',
+            'is_featured' => true,
+            'status' => 'published',
+        ]);
+
+        Project::query()->create([
+            'project_category_id' => $catGov->id,
+            'title' => 'Dangerous Drugs Board website version 4',
+            'slug' => 'ddb-website-v4',
+            'short_description' => 'Official DDB public website — version 4 redesign and rebuild.',
+            'full_description' => 'Version 4 of the Dangerous Drugs Board public website: modern layout, content sections, and maintainable frontend/backend structure for institutional publishing.',
+            'tech_stack' => ['Laravel', 'Blade', 'JavaScript', 'CSS'],
+            'client_name' => 'Dangerous Drugs Board (DDB)',
+            'project_url' => null,
+            'github_url' => null,
+            'duration' => 'Multi‑month',
+            'is_featured' => true,
+            'status' => 'published',
+        ]);
+
+        Project::query()->create([
+            'project_category_id' => $catGov->id,
+            'title' => 'Board Members Portal (BMP)',
+            'slug' => 'board-members-portal-bmp',
+            'short_description' => 'Private portal for Dangerous Drugs Board members.',
+            'full_description' => 'Board Members Portal (BMP) providing authenticated access for DDB board members — documents, updates, and member-facing workflows in a secure web portal.',
+            'tech_stack' => ['Laravel', 'MySQL', 'React', 'API'],
+            'client_name' => 'Dangerous Drugs Board (DDB)',
+            'project_url' => null,
+            'github_url' => null,
+            'duration' => 'Ongoing / phased',
+            'is_featured' => true,
+            'status' => 'published',
+        ]);
+
+        Project::query()->create([
+            'project_category_id' => $catGov->id,
+            'title' => 'Drug Abuse Prevention Education Mobile Application (DAPE_MA)',
+            'slug' => 'dape-ma-mobile-app',
+            'short_description' => 'Mobile app for drug abuse prevention education (DAPE_MA).',
+            'full_description' => 'Drug Abuse Prevention Education Mobile Application (DAPE_MA) — educational content and engagement features delivered as a mobile-ready application supporting DDB prevention programs.',
+            'tech_stack' => ['Laravel', 'API', 'Mobile', 'MySQL'],
+            'client_name' => 'Dangerous Drugs Board (DDB)',
+            'project_url' => null,
+            'github_url' => null,
+            'duration' => 'Multi‑month',
+            'is_featured' => true,
+            'status' => 'published',
+        ]);
+
         $services = [
             ['title' => 'Laravel Application Development', 'description' => 'CRMs, government systems, ordering, attendance — validation, queues, and clean layering.'],
             ['title' => 'React & Tailwind Frontends', 'description' => 'SPAs and marketing sites with SCSS/Tailwind, performance‑conscious bundles, and responsive layouts.'],
@@ -207,17 +267,50 @@ class LandogzSeeder extends Seeder
             Skill::query()->create([...$sk, 'sort_order' => $i]);
         }
 
-        TeamMember::query()->create([
-            'name' => 'Rolan Benavidez Jr.',
-            'position' => 'Owner · Senior Web Developer',
-            'bio' => 'Web developer with a background in software programming, QA, and MIS — now focused on Laravel, React, WordPress, and Shopify. Experience spans Subic, remote EU/US clients, and long‑running sports‑tech and full‑stack contracts. Polytechnic College of Botolan (BSIT) and Botolan Community College (ACT). Languages: English, Filipino, Zambal.',
-            'social_links' => [
-                'linkedin' => '',
-                'github' => '',
-                'twitter' => '',
+        $team = [
+            [
+                'name' => 'Rolan M. Benavidez Jr.',
+                'position' => 'Head / Senior Full-Stack Developer',
+                'bio' => 'Leads architecture and delivery across Laravel, React, WordPress, and Shopify — from APIs to production handoff.',
             ],
-            'sort_order' => 0,
-        ]);
+            [
+                'name' => 'Lester Angelo Dela Cruz',
+                'position' => 'System Analyst / Business Analyst',
+                'bio' => 'Turns business requirements into clear specs, workflows, and system designs the team can build against.',
+            ],
+            [
+                'name' => 'Eoin Villarin',
+                'position' => 'Full-Stack Web Developer',
+                'bio' => 'Builds end-to-end web features across backend APIs and modern frontend interfaces.',
+            ],
+            [
+                'name' => 'Gerald Hope S. Ecaruan',
+                'position' => 'Front-End Web Developer / Designer',
+                'bio' => 'Crafts responsive UI and visual polish with a focus on usability across devices.',
+            ],
+            [
+                'name' => 'Diana Marcia',
+                'position' => 'Junior Web Developer',
+                'bio' => 'Supports feature development, fixes, and day-to-day implementation across the stack.',
+            ],
+            [
+                'name' => 'Rey John Dayo',
+                'position' => 'Graphic Artist / Designer',
+                'bio' => 'Creates brand visuals, graphics, and design assets that support product and marketing.',
+            ],
+        ];
+
+        foreach ($team as $i => $member) {
+            TeamMember::query()->create([
+                ...$member,
+                'social_links' => [
+                    'linkedin' => '',
+                    'github' => '',
+                    'twitter' => '',
+                ],
+                'sort_order' => $i,
+            ]);
+        }
 
         Testimonial::query()->create([
             'client_name' => 'Jordan Lee',

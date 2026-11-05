@@ -132,60 +132,40 @@ export default function AdminSkills() {
             <AdminPageHeader title="Skills" description="Capability rows for the landing skills section — optional icon upload per item." />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} />
 
-            <div className={`${adminTableShell} mt-6`}>
-                <table className="min-w-full text-sm">
-                    <thead className={adminTableHead}>
-                        <tr>
-                            <th className={adminTh}>Name</th>
-                            <th className={adminTh}>Category</th>
-                            <th className={adminTh}>%</th>
-                            <th className={`${adminTh} text-right`}>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} className={`${adminTd} py-12 text-center text-slate-500`}>
-                                    No skills yet.
-                                </td>
-                            </tr>
-                        ) : (
-                            rows.map((s) => (
-                                <tr key={s.id} className="transition hover:bg-white/[0.02]">
-                                    <td className={`${adminTd} font-medium text-slate-200`}>{s.name}</td>
-                                    <td className={adminTd}>{s.category}</td>
-                                    <td className={`${adminTd} tabular-nums`}>{s.proficiency}</td>
-                                    <td className={`${adminTd} text-right`}>
-                                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(s)}>
-                                            Edit
-                                        </button>
-                                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(s.id)}>
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button type="button" disabled={page <= 1} className={adminPaginationBtn} onClick={() => setPage((p) => p - 1)}>
-                    Prev
-                </button>
-                <span className="text-sm text-slate-500">
-                    <span className="tabular-nums text-slate-300">{meta.current_page || page}</span> /{' '}
-                    <span className="tabular-nums">{meta.last_page || 1}</span>
-                </span>
-                <button
-                    type="button"
-                    disabled={(meta.current_page || page) >= (meta.last_page || 1)}
-                    className={adminPaginationBtn}
-                    onClick={() => setPage((p) => p + 1)}
-                >
-                    Next
-                </button>
-            </div>
+            <AdminDataTable
+                loading={loading}
+                error={loadError}
+                onRetry={load}
+                rows={rows}
+                emptyTitle="No skills yet"
+                emptyDescription="Add capabilities to show in the skills section."
+                emptyActionLabel="Add skill"
+                onEmptyAction={openCreate}
+                columns={[
+                    {
+                        key: 'name',
+                        label: 'Name',
+                        render: (r) => <span className="font-medium text-slate-200">{r.name}</span>,
+                    },
+                    { key: 'category', label: 'Category' },
+                    {
+                        key: 'proficiency',
+                        label: '%',
+                        render: (r) => <span className="tabular-nums">{r.proficiency}</span>,
+                    },
+                ]}
+                actions={(r) => (
+                    <>
+                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(r)}>
+                            Edit
+                        </button>
+                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(r.id)}>
+                            Delete
+                        </button>
+                    </>
+                )}
+            />
+            <AdminPagination meta={meta} page={page} onPageChange={setPage} />
 
             {modal ? (
                 <AdminModal title={editing ? 'Edit skill' : 'Create skill'} onClose={() => setModal(false)} wide>

@@ -15,7 +15,23 @@ root.render(
         <BrowserRouter>
             <GoogleAnalytics />
             <App />
-            <Toaster position="top-right" />
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    className: 'text-sm',
+                    style: {
+                        background: '#0f172a',
+                        color: '#e2e8f0',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                    },
+                    success: {
+                        iconTheme: { primary: '#38bdf8', secondary: '#0f172a' },
+                    },
+                    error: {
+                        iconTheme: { primary: '#fb7185', secondary: '#0f172a' },
+                    },
+                }}
+            />
         </BrowserRouter>
     </HelmetProvider>,
 );

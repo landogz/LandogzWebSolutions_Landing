@@ -3,7 +3,10 @@ import { api, unwrap } from '@/services/api';
 import toast from 'react-hot-toast';
 import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
-import { adminInput, adminLabel, adminPrimaryBtn, adminTextarea, adminPanel, adminFileInput } from '@/components/admin/adminTheme';
+import AdminLoadingState from '@/components/admin/AdminLoadingState';
+import AdminEmptyState from '@/components/admin/AdminEmptyState';
+import AdminImageField from '@/components/admin/AdminImageField';
+import { adminInput, adminLabel, adminPrimaryBtn, adminTextarea, adminPanel } from '@/components/admin/adminTheme';
 import { toastApiError } from '@/utils/toastApiError';
 
 const sectionTitle = 'mt-8 border-t border-white/10 pt-6 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 first:mt-0 first:border-t-0 first:pt-0';
@@ -21,9 +24,15 @@ export default function AdminSiteSettings() {
     const [form, setForm] = useState({});
     const [seoPerPageText, setSeoPerPageText] = useState('{}');
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [logoFile, setLogoFile] = useState(null);
+    const [faviconFile, setFaviconFile] = useState(null);
+    const [ogFile, setOgFile] = useState(null);
 
     function reload() {
         setLoading(true);
+        setLoadError(false);
         api
             .get('/admin/site-settings')
             .then((r) => {
@@ -33,7 +42,10 @@ export default function AdminSiteSettings() {
                     setSeoPerPageText(JSON.stringify(d.seo_per_page || {}, null, 2));
                 }
             })
-            .catch(() => toast.error('Failed to load'))
+            .catch(() => {
+                setLoadError(true);
+                toast.error('Failed to load');
+            })
             .finally(() => setLoading(false));
     }
 
@@ -43,6 +55,7 @@ export default function AdminSiteSettings() {
 
     async function save(e) {
         e.preventDefault();
+        if (saving) return;
         let perPage = {};
         try {
             const raw = (seoPerPageText ?? '').trim();
@@ -71,27 +84,30 @@ export default function AdminSiteSettings() {
         fd.append('google_analytics_measurement_id', (form.google_analytics_measurement_id || '').trim());
         fd.append('social_links', JSON.stringify(form.social_links || {}));
         fd.append('seo_per_page', JSON.stringify(perPage));
-        const logo = e.target.logo?.files?.[0];
-        const fav = e.target.favicon?.files?.[0];
-        const og = e.target.seo_og_image?.files?.[0];
-        if (logo) fd.append('logo', logo);
-        if (fav) fd.append('favicon', fav);
-        if (og) fd.append('seo_og_image', og);
+        if (logoFile) fd.append('logo', logoFile);
+        if (faviconFile) fd.append('favicon', faviconFile);
+        if (ogFile) fd.append('seo_og_image', ogFile);
+        setSaving(true);
         try {
             unwrap(await api.post('/admin/site-settings', fd));
             toast.success('Settings updated');
+            setLogoFile(null);
+            setFaviconFile(null);
+            setOgFile(null);
             reload();
         } catch (err) {
             toastApiError(err, 'Save failed');
+        } finally {
+            setSaving(false);
         }
     }
 
     if (loading) {
-        return (
-            <div className="flex min-h-[30vh] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500/30 border-t-sky-400" />
-            </div>
-        );
+        return <AdminLoadingState />;
+    }
+
+    if (loadError) {
+        return <AdminEmptyState error onRetry={reload} />;
     }
 
     return (
@@ -173,15 +189,13 @@ export default function AdminSiteSettings() {
                         From Google Analytics → Admin → Data streams → your stream → Measurement ID. Leave empty to disable tracking.
                     </p>
                 </Field>
-                <Field label="Open Graph share image">
-                    {form.seo_og_image_url ? (
-                        <div className="mb-3">
-                            <img src={form.seo_og_image_url} alt="" className="max-h-32 rounded-lg border border-white/10 object-contain" />
-                        </div>
-                    ) : null}
-                    <input name="seo_og_image" type="file" accept="image/*" className={adminFileInput} />
-                    <p className="mt-1 text-xs text-slate-500">Recommended ~1200×630px. Used for social previews when shared.</p>
-                </Field>
+                <AdminImageField
+                    label="Open Graph share image"
+                    currentUrl={form.seo_og_image_url}
+                    file={ogFile}
+                    onFileChange={setOgFile}
+                    hint="Recommended ~1200×630px. Used for social previews when shared."
+                />
                 <Field label="Per-page SEO (JSON, advanced)">
                     <textarea
                         className={adminTextarea}
@@ -194,26 +208,18 @@ export default function AdminSiteSettings() {
                 </Field>
 
                 <h2 className={sectionTitle}>Assets</h2>
-                <Field label="Logo">
-                    {form.logo_url ? (
-                        <div className="mb-3">
-                            <img src={form.logo_url} alt="" className="max-h-16 rounded-lg border border-white/10 object-contain" />
-                        </div>
-                    ) : null}
-                    <input name="logo" type="file" accept="image/*" className={adminFileInput} />
-                </Field>
-                <Field label="Favicon">
-                    {form.favicon_url ? (
-                        <div className="mb-3">
-                            <img src={form.favicon_url} alt="" className="h-12 w-12 rounded border border-white/10 object-contain" />
-                        </div>
-                    ) : null}
-                    <input name="favicon" type="file" accept="image/*" className={adminFileInput} />
-                </Field>
+                <AdminImageField label="Logo" currentUrl={form.logo_url} file={logoFile} onFileChange={setLogoFile} />
+                <AdminImageField
+                    label="Favicon"
+                    currentUrl={form.favicon_url}
+                    file={faviconFile}
+                    onFileChange={setFaviconFile}
+                    hint="Square PNG or ICO recommended (32×32 or 64×64)."
+                />
 
                 <div className="pt-4">
-                    <button type="submit" className={adminPrimaryBtn}>
-                        Save settings
+                    <button type="submit" className={adminPrimaryBtn} disabled={saving} aria-busy={saving}>
+                        {saving ? 'Saving…' : 'Save settings'}
                     </button>
                 </div>
             </form>

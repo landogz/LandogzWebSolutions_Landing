@@ -1,3 +1,5 @@
+import { Helmet } from 'react-helmet-async';
+
 /**
  * JSON-LD Organization + WebSite for Google rich results eligibility.
  */
@@ -49,5 +51,9 @@ export default function OrganizationJsonLd({ site, canonicalOrigin }) {
         '@graph': [org, web],
     };
 
-    return <script type="application/ld+json">{JSON.stringify(graph)}</script>;
+    return (
+        <Helmet>
+            <script type="application/ld+json">{JSON.stringify(graph)}</script>
+        </Helmet>
+    );
 }

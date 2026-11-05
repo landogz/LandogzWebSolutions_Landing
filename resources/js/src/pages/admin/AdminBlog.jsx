@@ -5,6 +5,9 @@ import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminDataTable from '@/components/admin/AdminDataTable';
+import AdminPagination from '@/components/admin/AdminPagination';
+import AdminImageField from '@/components/admin/AdminImageField';
 import {
     adminInput,
     adminLabel,
@@ -12,13 +15,7 @@ import {
     adminSecondaryBtn,
     adminSelect,
     adminTextarea,
-    adminFileInput,
-    adminTableShell,
-    adminTableHead,
-    adminTh,
-    adminTd,
     adminBadge,
-    adminPaginationBtn,
     adminTextLink,
     adminTextLinkDanger,
 } from '@/components/admin/adminTheme';
@@ -93,8 +90,14 @@ export default function AdminBlog() {
     const [form, setForm] = useState(empty);
     const [featuredFile, setFeaturedFile] = useState(null);
     const [deleteId, setDeleteId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     function load() {
+        setLoading(true);
+        setLoadError(false);
         api
             .get('/admin/blog-posts', { params: { page, per_page: 12 } })
             .then((r) => {
@@ -102,7 +105,11 @@ export default function AdminBlog() {
                 setRows(d.items || []);
                 setMeta(d.pagination || {});
             })
-            .catch(() => toast.error('Failed to load'));
+            .catch(() => {
+                setLoadError(true);
+                toast.error('Failed to load');
+            })
+            .finally(() => setLoading(false));
     }
 
     useEffect(() => {
@@ -150,6 +157,8 @@ export default function AdminBlog() {
 
     async function save(e) {
         e.preventDefault();
+        if (saving) return;
+        setSaving(true);
         try {
             if (editing) {
                 if (featuredFile) {
@@ -169,10 +178,14 @@ export default function AdminBlog() {
             load();
         } catch (err) {
             toastApiError(err, 'Save failed');
+        } finally {
+            setSaving(false);
         }
     }
 
     async function remove(id) {
+        if (deleting) return;
+        setDeleting(true);
         try {
             unwrap(await api.delete(`/admin/blog-posts/${id}`));
             toast.success('Deleted');
@@ -180,6 +193,8 @@ export default function AdminBlog() {
             load();
         } catch (err) {
             toastApiError(err, 'Delete failed');
+        } finally {
+            setDeleting(false);
         }
     }
 
@@ -191,63 +206,42 @@ export default function AdminBlog() {
             />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} createLabel="New post" />
 
-            <div className={`${adminTableShell} mt-6`}>
-                <table className="min-w-full text-sm">
-                    <thead className={adminTableHead}>
-                        <tr>
-                            <th className={adminTh}>Title</th>
-                            <th className={adminTh}>Status</th>
-                            <th className={`${adminTh} text-right`}>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={3} className={`${adminTd} py-12 text-center text-slate-500`}>
-                                    No posts yet.
-                                </td>
-                            </tr>
-                        ) : (
-                            rows.map((b) => (
-                                <tr key={b.id} className="transition hover:bg-white/[0.02]">
-                                    <td className={`${adminTd} font-medium text-slate-200`}>{b.title}</td>
-                                    <td className={adminTd}>
-                                        <span className={adminBadge}>{b.status}</span>
-                                    </td>
-                                    <td className={`${adminTd} text-right`}>
-                                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(b)}>
-                                            Edit
-                                        </button>
-                                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(b.id)}>
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button type="button" disabled={page <= 1} className={adminPaginationBtn} onClick={() => setPage((p) => p - 1)}>
-                    Prev
-                </button>
-                <span className="text-sm text-slate-500">
-                    <span className="tabular-nums text-slate-300">{meta.current_page || page}</span> /{' '}
-                    <span className="tabular-nums">{meta.last_page || 1}</span>
-                </span>
-                <button
-                    type="button"
-                    disabled={(meta.current_page || page) >= (meta.last_page || 1)}
-                    className={adminPaginationBtn}
-                    onClick={() => setPage((p) => p + 1)}
-                >
-                    Next
-                </button>
-            </div>
+            <AdminDataTable
+                loading={loading}
+                error={loadError}
+                onRetry={load}
+                rows={rows}
+                emptyTitle="No posts yet"
+                emptyDescription="Write your first blog post to publish on the site."
+                emptyActionLabel="New post"
+                onEmptyAction={openCreate}
+                columns={[
+                    {
+                        key: 'title',
+                        label: 'Title',
+                        render: (b) => <span className="font-medium text-slate-200">{b.title}</span>,
+                    },
+                    {
+                        key: 'status',
+                        label: 'Status',
+                        render: (b) => <span className={adminBadge}>{b.status}</span>,
+                    },
+                ]}
+                actions={(b) => (
+                    <>
+                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(b)}>
+                            Edit
+                        </button>
+                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(b.id)}>
+                            Delete
+                        </button>
+                    </>
+                )}
+            />
+            <AdminPagination meta={meta} page={page} onPageChange={setPage} />
 
             {modal ? (
-                <AdminModal title={editing ? 'Edit post' : 'New post'} onClose={() => setModal(false)} wide>
+                <AdminModal title={editing ? 'Edit post' : 'New post'} onClose={() => !saving && setModal(false)} wide>
                     <form onSubmit={save} className="space-y-4">
                         <label className="block">
                             <span className={adminLabel}>Title</span>
@@ -297,15 +291,17 @@ export default function AdminBlog() {
                                 />
                             </label>
                         </div>
-                        <label className="block">
-                            <span className={adminLabel}>Featured image</span>
-                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setFeaturedFile(e.target.files?.[0] || null)} />
-                        </label>
+                        <AdminImageField
+                            label="Featured image"
+                            currentUrl={editing?.featured_image_url}
+                            file={featuredFile}
+                            onFileChange={setFeaturedFile}
+                        />
                         <div className="flex flex-wrap gap-3 pt-2">
-                            <button type="submit" className={adminPrimaryBtn}>
-                                Save
+                            <button type="submit" className={adminPrimaryBtn} disabled={saving} aria-busy={saving}>
+                                {saving ? 'Saving…' : 'Save'}
                             </button>
-                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)} disabled={saving}>
                                 Cancel
                             </button>
                         </div>
@@ -314,7 +310,13 @@ export default function AdminBlog() {
             ) : null}
 
             {deleteId ? (
-                <AdminConfirmDialog title="Delete this post?" onConfirm={() => remove(deleteId)} onCancel={() => setDeleteId(null)} danger />
+                <AdminConfirmDialog
+                    title="Delete this post?"
+                    onConfirm={() => remove(deleteId)}
+                    onCancel={() => !deleting && setDeleteId(null)}
+                    busy={deleting}
+                    danger
+                />
             ) : null}
         </div>
     );

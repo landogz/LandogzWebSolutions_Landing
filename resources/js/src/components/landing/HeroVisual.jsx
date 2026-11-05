@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { prefersReducedMotion } from '@/sections/landing/sectionVariants';
 
 const codeLines = [
     { text: 'Route::prefix(\'api/v1\')->group(function () {', className: 'text-slate-500' },
@@ -9,13 +10,15 @@ const codeLines = [
 ];
 
 export default function HeroVisual() {
+    const reduce = prefersReducedMotion();
+
     return (
         <div className="relative mx-auto w-full min-w-0 max-w-lg pr-2 sm:pr-5 lg:max-w-none lg:pr-8">
             <div className="pointer-events-none absolute -inset-4 rounded-[2rem] bg-gradient-to-tr from-sky-500/20 via-violet-600/10 to-transparent blur-3xl dark:from-sky-400/15" />
             <motion.div
-                initial={{ opacity: 0, y: 24, rotateX: 8 }}
+                initial={reduce ? false : { opacity: 0, y: 24, rotateX: 8 }}
                 animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: reduce ? 0.01 : 0.7, delay: reduce ? 0 : 0.2, ease: [0.22, 1, 0.36, 1] }}
                 className="relative origin-center scale-[0.94] sm:scale-[0.96] lg:scale-[0.95] lg:origin-top"
             >
                 <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-2xl shadow-slate-900/15 ring-1 ring-slate-900/5 dark:border-white/10 dark:bg-landogz-navy/90 dark:shadow-black/40 dark:ring-white/5">
@@ -31,16 +34,16 @@ export default function HeroVisual() {
                         {codeLines.map((line, i) => (
                             <motion.div
                                 key={line.text}
-                                initial={{ opacity: 0, x: -8 }}
+                                initial={reduce ? false : { opacity: 0, x: -8 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.35 + i * 0.08 }}
+                                transition={{ delay: reduce ? 0 : 0.35 + i * 0.08 }}
                                 className={line.className}
                             >
                                 {line.text}
                             </motion.div>
                         ))}
                         <motion.span
-                            className="inline-block h-4 w-1.5 animate-pulse bg-sky-500 align-middle"
+                            className={`inline-block h-4 w-1.5 bg-sky-500 align-middle ${reduce ? '' : 'animate-pulse'}`}
                             aria-hidden
                         />
                     </div>

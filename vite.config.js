@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
     plugins: [
         laravel({
-            input: 'resources/js/app.jsx',
+            input: ['resources/js/app.jsx', 'resources/css/app.css'],
             refresh: true,
         }),
         react(),
@@ -21,8 +21,8 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            '/api': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-            '/storage': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+            '/api': { target: 'http://127.0.0.1:8001', changeOrigin: true },
+            '/storage': { target: 'http://127.0.0.1:8001', changeOrigin: true },
         },
     },
 });

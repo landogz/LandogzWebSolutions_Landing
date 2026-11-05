@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { api, unwrap } from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
@@ -86,11 +86,20 @@ function NavItems({ onNavigate }) {
 
 export default function AdminLayout() {
     const nav = useNavigate();
+    const location = useLocation();
     const logout = useAuthStore((s) => s.logout);
     const setAuth = useAuthStore((s) => s.setAuth);
     const user = useAuthStore((s) => s.user);
     const token = useAuthStore((s) => s.token);
     const [mobileOpen, setMobileOpen] = useState(false);
+
+    const pageTitle = useMemo(() => {
+        const path = location.pathname.replace(/\/$/, '') || '/admin';
+        const role = user?.role;
+        const flat = buildNavGroups(role).flatMap((g) => g.items);
+        const hit = flat.find((item) => (item.end ? path === item.to : path === item.to || path.startsWith(`${item.to}/`)));
+        return hit?.label || 'Admin';
+    }, [location.pathname, user?.role]);
 
     useEffect(() => {
         if (!token || user) {
@@ -166,9 +175,9 @@ export default function AdminLayout() {
 
             {/* Mobile header */}
             <div className="fixed left-0 right-0 top-0 z-30 flex items-center justify-between border-b border-white/[0.08] bg-slate-950/90 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-xl md:hidden">
-                <div>
-                    <p className="font-display text-base font-bold text-white">Landogz</p>
-                    <p className="text-[10px] uppercase tracking-wider text-slate-500">Admin</p>
+                <div className="min-w-0">
+                    <p className="font-display truncate text-base font-bold text-white">{pageTitle}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-slate-500">Landogz Admin</p>
                 </div>
                 <button
                     type="button"

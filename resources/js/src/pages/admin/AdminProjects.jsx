@@ -5,6 +5,9 @@ import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminDataTable from '@/components/admin/AdminDataTable';
+import AdminPagination from '@/components/admin/AdminPagination';
+import AdminImageField from '@/components/admin/AdminImageField';
 import {
     adminInput,
     adminLabel,
@@ -13,12 +16,7 @@ import {
     adminSelect,
     adminTextarea,
     adminFileInput,
-    adminTableShell,
-    adminTableHead,
-    adminTh,
-    adminTd,
     adminBadge,
-    adminPaginationBtn,
     adminTextLink,
     adminTextLinkDanger,
 } from '@/components/admin/adminTheme';
@@ -103,6 +101,7 @@ export default function AdminProjects() {
     const [page, setPage] = useState(1);
     const [meta, setMeta] = useState({});
     const [search, setSearch] = useState('');
+    const [searchInput, setSearchInput] = useState('');
     const [categories, setCategories] = useState([]);
     const [modal, setModal] = useState(false);
     const [editing, setEditing] = useState(null);
@@ -110,6 +109,10 @@ export default function AdminProjects() {
     const [thumbnailFile, setThumbnailFile] = useState(null);
     const [galleryFiles, setGalleryFiles] = useState([]);
     const [deleteId, setDeleteId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     function loadCategories() {
         api
@@ -119,6 +122,8 @@ export default function AdminProjects() {
     }
 
     function load() {
+        setLoading(true);
+        setLoadError(false);
         api
             .get('/admin/projects', { params: { page, search, per_page: 12 } })
             .then((r) => {
@@ -126,12 +131,24 @@ export default function AdminProjects() {
                 setRows(d.items || []);
                 setMeta(d.pagination || {});
             })
-            .catch(() => toast.error('Failed to load projects'));
+            .catch(() => {
+                setLoadError(true);
+                toast.error('Failed to load projects');
+            })
+            .finally(() => setLoading(false));
     }
 
     useEffect(() => {
         loadCategories();
     }, []);
+
+    useEffect(() => {
+        const t = setTimeout(() => {
+            setPage(1);
+            setSearch(searchInput.trim());
+        }, 300);
+        return () => clearTimeout(t);
+    }, [searchInput]);
 
     useEffect(() => {
         load();
@@ -177,6 +194,8 @@ export default function AdminProjects() {
 
     async function save(e) {
         e.preventDefault();
+        if (saving) return;
+        setSaving(true);
         const needsMultipart = Boolean(thumbnailFile) || (galleryFiles?.length > 0);
         try {
             if (editing) {
@@ -202,6 +221,8 @@ export default function AdminProjects() {
             load();
         } catch (err) {
             toastApiError(err, 'Save failed');
+        } finally {
+            setSaving(false);
         }
     }
 
@@ -217,6 +238,8 @@ export default function AdminProjects() {
     }
 
     async function remove(id) {
+        if (deleting) return;
+        setDeleting(true);
         try {
             unwrap(await api.delete(`/admin/projects/${id}`));
             toast.success('Deleted');
@@ -224,6 +247,8 @@ export default function AdminProjects() {
             load();
         } catch (err) {
             toastApiError(err, 'Delete failed');
+        } finally {
+            setDeleting(false);
         }
     }
 
@@ -238,71 +263,57 @@ export default function AdminProjects() {
             <input
                 className={`${adminInput} mt-4 max-w-md`}
                 placeholder="Search projects…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
             />
 
-            <div className={`${adminTableShell} mt-6`}>
-                <table className="min-w-full text-sm">
-                    <thead className={adminTableHead}>
-                        <tr>
-                            <th className={adminTh}>Title</th>
-                            <th className={adminTh}>Status</th>
-                            <th className={adminTh}>Featured</th>
-                            <th className={`${adminTh} text-right`}>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} className={`${adminTd} py-12 text-center text-slate-500`}>
-                                    No projects match your filters.
-                                </td>
-                            </tr>
-                        ) : (
-                            rows.map((p) => (
-                                <tr key={p.id} className="transition hover:bg-white/[0.02]">
-                                    <td className={adminTd}>
-                                        <span className="font-medium text-slate-200">{p.title}</span>
-                                    </td>
-                                    <td className={adminTd}>
-                                        <span className={adminBadge}>{p.status}</span>
-                                    </td>
-                                    <td className={adminTd}>{p.is_featured ? 'Yes' : 'No'}</td>
-                                    <td className={`${adminTd} text-right`}>
-                                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(p)}>
-                                            Edit
-                                        </button>
-                                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(p.id)}>
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button type="button" disabled={page <= 1} className={adminPaginationBtn} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-                    Prev
-                </button>
-                <span className="text-sm text-slate-500">
-                    Page <span className="tabular-nums text-slate-300">{meta.current_page || page}</span> /{' '}
-                    <span className="tabular-nums">{meta.last_page || 1}</span>
-                </span>
-                <button
-                    type="button"
-                    disabled={(meta.current_page || page) >= (meta.last_page || 1)}
-                    className={adminPaginationBtn}
-                    onClick={() => setPage((p) => p + 1)}
-                >
-                    Next
-                </button>
-            </div>
+            <AdminDataTable
+                loading={loading}
+                error={loadError}
+                onRetry={load}
+                rows={rows}
+                filtered={Boolean(search)}
+                emptyTitle="No projects yet"
+                emptyDescription="Add your first case study for the public portfolio."
+                emptyActionLabel="Create project"
+                onEmptyAction={openCreate}
+                media={(p) =>
+                    p.thumbnail_url ? (
+                        <img src={p.thumbnail_url} alt="" className="h-10 w-14 rounded-lg object-cover ring-1 ring-white/10" />
+                    ) : null
+                }
+                columns={[
+                    {
+                        key: 'title',
+                        label: 'Title',
+                        render: (p) => <span className="font-medium text-slate-200">{p.title}</span>,
+                    },
+                    {
+                        key: 'status',
+                        label: 'Status',
+                        render: (p) => <span className={adminBadge}>{p.status}</span>,
+                    },
+                    {
+                        key: 'is_featured',
+                        label: 'Featured',
+                        render: (p) => (p.is_featured ? 'Yes' : 'No'),
+                    },
+                ]}
+                actions={(p) => (
+                    <>
+                        <button type="button" className={`${adminTextLink} mr-1`} onClick={() => openEdit(p)}>
+                            Edit
+                        </button>
+                        <button type="button" className={adminTextLinkDanger} onClick={() => setDeleteId(p.id)}>
+                            Delete
+                        </button>
+                    </>
+                )}
+            />
+            <AdminPagination meta={meta} page={page} onPageChange={setPage} />
 
             {modal ? (
-                <AdminModal title={editing ? 'Edit project' : 'Create project'} onClose={() => setModal(false)} wide>
+                <AdminModal title={editing ? 'Edit project' : 'Create project'} onClose={() => !saving && setModal(false)} wide>
                     <form onSubmit={save} className="space-y-4">
                         <label className="block">
                             <span className={adminLabel}>Category</span>
@@ -377,34 +388,43 @@ export default function AdminProjects() {
                                 <input className={adminInput} value={form.github_url} onChange={(e) => setForm({ ...form, github_url: e.target.value })} />
                             </label>
                         </div>
-                        <label className="block">
-                            <span className={adminLabel}>Thumbnail</span>
-                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)} />
-                        </label>
+                        <AdminImageField
+                            label="Thumbnail"
+                            currentUrl={editing?.thumbnail_url}
+                            file={thumbnailFile}
+                            onFileChange={setThumbnailFile}
+                        />
                         <label className="block">
                             <span className={adminLabel}>Add gallery images</span>
                             <input type="file" accept="image/*" multiple className={adminFileInput} onChange={(e) => setGalleryFiles(e.target.files ? Array.from(e.target.files) : [])} />
                         </label>
-                        {editing && editing.gallery_paths?.length ? (
+                        {editing?.gallery_urls?.length || editing?.gallery_paths?.length ? (
                             <div>
                                 <span className={adminLabel}>Current gallery</span>
-                                <ul className="mt-2 space-y-2">
-                                    {editing.gallery_paths.map((path) => (
-                                        <li key={path} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-2">
-                                            <span className="truncate text-xs text-slate-500">{path}</span>
-                                            <button type="button" className={adminTextLinkDanger} onClick={() => removeGalleryPath(editing.id, path)}>
-                                                Remove
-                                            </button>
-                                        </li>
-                                    ))}
+                                <ul className="mt-2 grid gap-3 sm:grid-cols-2">
+                                    {(editing.gallery_urls || editing.gallery_paths || []).map((item, idx) => {
+                                        const path = editing.gallery_paths?.[idx] || item;
+                                        const url = editing.gallery_urls?.[idx] || null;
+                                        return (
+                                            <li key={path} className="overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02]">
+                                                {url ? <img src={url} alt="" className="h-24 w-full object-cover" /> : null}
+                                                <div className="flex items-center justify-between gap-2 px-3 py-2">
+                                                    <span className="truncate text-xs text-slate-500">{path}</span>
+                                                    <button type="button" className={adminTextLinkDanger} onClick={() => removeGalleryPath(editing.id, path)}>
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                             </div>
                         ) : null}
                         <div className="flex flex-wrap gap-3 pt-2">
-                            <button type="submit" className={adminPrimaryBtn}>
-                                Save
+                            <button type="submit" className={adminPrimaryBtn} disabled={saving} aria-busy={saving}>
+                                {saving ? 'Saving…' : 'Save'}
                             </button>
-                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)}>
+                            <button type="button" className={adminSecondaryBtn} onClick={() => setModal(false)} disabled={saving}>
                                 Cancel
                             </button>
                         </div>
@@ -417,7 +437,8 @@ export default function AdminProjects() {
                     title="Delete this project?"
                     message="All images will be removed from storage."
                     onConfirm={() => remove(deleteId)}
-                    onCancel={() => setDeleteId(null)}
+                    onCancel={() => !deleting && setDeleteId(null)}
+                    busy={deleting}
                     danger
                 />
             ) : null}

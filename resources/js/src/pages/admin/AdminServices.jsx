@@ -90,11 +90,24 @@ export default function AdminServices() {
             <AdminPageHeader title="Services" description="Service cards on the landing page — icon, title, short copy, and display order." />
             <AdminCrudToolbar onReload={load} onCreate={openCreate} />
 
-            <ul className="mt-6 space-y-3">
-                {rows.length === 0 ? (
-                    <li className="rounded-xl border border-dashed border-white/10 py-12 text-center text-sm text-slate-500">No services yet.</li>
-                ) : (
-                    rows.map((s) => (
+            {loading ? (
+                <AdminLoadingState />
+            ) : loadError ? (
+                <div className="mt-6">
+                    <AdminEmptyState error onRetry={load} />
+                </div>
+            ) : rows.length === 0 ? (
+                <div className="mt-6">
+                    <AdminEmptyState
+                        title="No services yet"
+                        description="Add the services you offer on the landing page."
+                        actionLabel="Add service"
+                        onAction={openCreate}
+                    />
+                </div>
+            ) : (
+                <ul className="mt-6 space-y-3">
+                    {rows.map((s) => (
                         <li key={s.id} className={adminListRow}>
                             <span className="text-slate-200">
                                 <span className="mr-2 text-lg" aria-hidden>
@@ -111,9 +124,9 @@ export default function AdminServices() {
                                 </button>
                             </div>
                         </li>
-                    ))
-                )}
-            </ul>
+                    ))}
+                </ul>
+            )}
 
             {modal ? (
                 <AdminModal title={editing ? 'Edit service' : 'Create service'} onClose={() => setModal(false)}>
