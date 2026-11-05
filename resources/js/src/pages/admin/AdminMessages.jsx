@@ -5,13 +5,10 @@ import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminDataTable from '@/components/admin/AdminDataTable';
+import AdminPagination from '@/components/admin/AdminPagination';
 import {
-    adminTableShell,
-    adminTableHead,
-    adminTh,
-    adminTd,
     adminBadge,
-    adminPaginationBtn,
     adminTextLink,
     adminTextLinkDanger,
 } from '@/components/admin/adminTheme';

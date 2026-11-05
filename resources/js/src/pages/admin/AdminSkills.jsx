@@ -5,17 +5,14 @@ import AdminCrudToolbar from '@/components/admin/AdminCrudToolbar';
 import AdminModal from '@/components/admin/AdminModal';
 import AdminConfirmDialog from '@/components/admin/AdminConfirmDialog';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminDataTable from '@/components/admin/AdminDataTable';
+import AdminPagination from '@/components/admin/AdminPagination';
+import AdminImageField from '@/components/admin/AdminImageField';
 import {
     adminInput,
     adminLabel,
     adminPrimaryBtn,
     adminSecondaryBtn,
-    adminFileInput,
-    adminTableShell,
-    adminTableHead,
-    adminTh,
-    adminTd,
-    adminPaginationBtn,
     adminTextLink,
     adminTextLinkDanger,
 } from '@/components/admin/adminTheme';
@@ -199,10 +196,12 @@ export default function AdminSkills() {
                                 onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) || 0 })}
                             />
                         </label>
-                        <label className="block">
-                            <span className={adminLabel}>Icon {editing ? '(optional new file)' : '(optional)'}</span>
-                            <input type="file" accept="image/*" className={adminFileInput} onChange={(e) => setIconFile(e.target.files?.[0] || null)} />
-                        </label>
+                        <AdminImageField
+                            label={editing ? 'Icon (optional new file)' : 'Icon (optional)'}
+                            currentUrl={editing?.icon_url}
+                            file={iconFile}
+                            onFileChange={setIconFile}
+                        />
                         <div className="flex flex-wrap gap-3 pt-2">
                             <button type="submit" className={adminPrimaryBtn}>
                                 Save
